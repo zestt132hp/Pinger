@@ -1,0 +1,19 @@
+{
+  "Configuration": {
+    "Section0": {
+      "Host": "ya.ru",
+      "Period": "1",
+      "Protocol": "ICMP"
+    },
+    "Section1": {
+      "Host": "ebanoe.it",
+      "Period": "5",
+      "Protocol": "HTTP"
+    },
+    "Section3": {
+      "Host": "google.com",
+      "Period": "3",
+      "Protocol": "TCP"
+    }
+  }
+}

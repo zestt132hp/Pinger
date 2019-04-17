@@ -1,0 +1,5 @@
+First Steps to create a project.
+Add NLog and Create NLogConfiguration (Singleton)
+Add Patter in "Protocols" (Template Method)
+Add Configuration format in "json"
+Signed-off-by: Nikolay <zestt132hp@gmail.com>
