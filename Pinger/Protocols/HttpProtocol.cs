@@ -2,10 +2,12 @@
 using System.Net;
 using System.Text.RegularExpressions;
 using Pinger.Logger;
+using Pinger.PingerModule;
+using Pinger.Protocols;
 
 namespace Pinger.Modules
 {
-    class HttpProtocol:Protocol,Protocols.IProtocol
+    class HttpProtocol : IProtocol
     {
         private readonly Regex _regex = new Regex(string.Format("^(http|https)://"));
         private string _host;
@@ -24,7 +26,7 @@ namespace Pinger.Modules
                 _host = "http://" + hostName; //присваиваем по умолчанию 
             _host = hostName;
         }
-        public override string Host {
+        public string Host {
             get { return _host; }
             set
             {
@@ -32,16 +34,11 @@ namespace Pinger.Modules
             } 
         }
 
-        public void SendRequest(ILogger loger)
+        //public Double Interval { get; set; }
+
+        public RequestStatus SendRequest(ILogger logger)
         {
-            try
-            {
-                WebRequest.CreateHttp(Host);
-            }
-            catch (Exception e)
-            {
-                loger.Write(e);
-            }
+            throw new NotImplementedException();
         }
     }
 }

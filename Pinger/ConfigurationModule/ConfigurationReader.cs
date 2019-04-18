@@ -4,15 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
+using Pinger.Modules;
 using Pinger.Protocols;
 
 namespace Pinger.ConfigurationModule
 {
-    class ConfigurationReader:IConfigReader
+    class ConfigurationReader: IConfigReader
     {
         private static XElement rootNode;
         private static String configFileName { get; set; }
-        private static List<IProtocol>protocolsList= new List<IProtocol>();
+        private static List<PingerProtocol>protocolsList= new List<PingerProtocol>();
         public ConfigurationReader(String fileName)
         {
             string uri = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName;
@@ -31,7 +32,7 @@ namespace Pinger.ConfigurationModule
         {
             rootNode.Save(fileName);
         }
-        private static List<IProtocol> GetConfigEntry(CustomConfigAttribute attribute)
+        private static List<PingerProtocol> GetConfigEntry(CustomConfigAttribute attribute)
         {
             if (rootNode == null)
             {
@@ -53,16 +54,7 @@ namespace Pinger.ConfigurationModule
                 protocolsList.Add(Protocols.ProtocolCreator.CreateProtocol(item));
             return protocolsList;
         }
-        IList<IProtocol> IConfigReader.GetConfigEntry(Enum enumValue)
-        {
-            Type type = enumValue.GetType();
-            FieldInfo info = type.GetField(enumValue.ToString());
-            var customAttribute = Attribute.GetCustomAttribute(info,
-                typeof(CustomConfigAttribute)) as CustomConfigAttribute;
-            return GetConfigEntry(customAttribute);
-        }
-
-        void IConfigReader.SetConfigEntry(Enum enumValue, string entryValue)
+        public void SetConfigEntry(Enum enumValue, string entryValue)
         {
             if (entryValue == null)
             {
@@ -75,11 +67,20 @@ namespace Pinger.ConfigurationModule
                 typeof(CustomConfigAttribute)) as CustomConfigAttribute;
             SetConfigEntry(customAttribute, entryValue);
         }
+
+        public IList<PingerProtocol> GetConfigEntry(Enum enumValue)
+        {
+            Type type = enumValue.GetType();
+            FieldInfo info = type.GetField(enumValue.ToString());
+            var customAttribute = Attribute.GetCustomAttribute(info,
+                typeof(CustomConfigAttribute)) as CustomConfigAttribute;
+            return GetConfigEntry(customAttribute);
+        }
         private static void SetConfigEntry(CustomConfigAttribute attribute,
                                        String entryValue)
         {
             throw new NotImplementedException();
-            if (rootNode == null)
+            /*if (rootNode == null)
             {
                 return;
             }
@@ -100,14 +101,14 @@ namespace Pinger.ConfigurationModule
                 return;
             }
 
-            item.First().Value = entryValue;*/
-            SaveConfigFile(configFileName);
+            item.First().Value = entryValue;
+            SaveConfigFile(configFileName);*/
         }
     }
 
     interface IConfigReader
     {
-        IList<IProtocol> GetConfigEntry(Enum enumValue);
+        IList<PingerProtocol> GetConfigEntry(Enum enumValue);
         void SetConfigEntry(Enum enumValue, String entryValue);
     }
 }

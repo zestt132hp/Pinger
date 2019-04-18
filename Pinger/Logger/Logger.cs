@@ -10,7 +10,6 @@ namespace Pinger.Logger
         public void Write<T>(T message)
         {
             throw new NotImplementedException();
-            _logger.Info(message);
         }
     }
 }

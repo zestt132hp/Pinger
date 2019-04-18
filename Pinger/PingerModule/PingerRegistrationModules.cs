@@ -1,4 +1,7 @@
-﻿using Ninject.Modules;
+﻿using System;
+using System.Net;
+using System.Net.NetworkInformation;
+using Ninject.Modules;
 using Pinger.ConfigurationModule;
 using Pinger.GUI;
 using Pinger.Modules;
@@ -14,9 +17,11 @@ namespace Pinger.PingerModule
             Bind<IProtocol>().To<HttpProtocol>();
             Bind<IProtocol>().To<TcpProtocol>();
             Bind<IProtocol>().To<IcmpProtocol>();
-            Bind<IConfigReader>().To<ConfigurationReader>();
+            Bind<IConfigReader>().To<ConfigurationReader>().WithConstructorArgument("PingerConfiguration.config");
+            Bind<IPinger>().To<PingerModule.Pinger>();
             Bind<IGui>().To<ConsoleGui>();
             Bind<ILogger>().To<Logger.Logger>();
         }
     }
+    
 }

@@ -2,16 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Pinger.ConfigurationModule;
+using Pinger.Logger;
+using Pinger.PingerModule;
 using Pinger.Protocols;
 
 namespace Pinger.Modules
 {
-    abstract class Protocol
+    class PingerProtocol
     {
-        private static Int32 interaval = 5;
-        public virtual string Host { get; set; }
-        public virtual int Interval { get; set; } = interaval;
+        public Double Interval { get; set; }
+        public void Ping<T>(IProtocol protocol, ILogger logger)
+        {
+           protocol.SendRequest(logger);
+        }
     }
 }

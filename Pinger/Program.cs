@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ninject;
@@ -29,8 +22,16 @@ namespace Pinger
         {
             IGui gui = ninjectKernel.Get<IGui>();
             gui.Run();
-            ConfigurationModule.IConfigReader reader = new ConfigurationReader("PingerConfiguration.config");
-            reader.GetConfigEntry(Configuration.RefreshRate);
+            /*IPinger pinger = ninjectKernel.Get<IPinger>();
+            pinger.Ping(ninjectKernel.Get<IConfigReader>(), logger);*/
+        }
+
+        internal static void Run(object stateInfo)
+        {
+            Console.WriteLine("Начало операции...");
+            IPinger pinger = ninjectKernel.Get<IPinger>();
+            pinger.Ping(ninjectKernel.Get<IConfigReader>(), logger);
         }
     }
 }
+ 

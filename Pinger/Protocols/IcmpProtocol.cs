@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Pinger.Logger;
+using Pinger.PingerModule;
 using Pinger.Protocols;
 
 namespace Pinger.Modules
 {
-    class IcmpProtocol:Protocol, IProtocol
+    internal class IcmpProtocol:IProtocol
     {
-        public void SendRequest(ILogger loger)
+        public string Host { get; set; }
+        //public Double Interval { get; set; }
+
+        public RequestStatus SendRequest(ILogger logger)
         {
             throw new NotImplementedException();
         }

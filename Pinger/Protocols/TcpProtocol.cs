@@ -1,22 +1,46 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Net.Sockets;
+using System.Text;
 using Pinger.Logger;
+using Pinger.PingerModule;
 using Pinger.Protocols;
 
 namespace Pinger.Modules
 {
-    class TcpProtocol:Protocol, Protocols.IProtocol
+    class TcpProtocol: IProtocol
     {
         private static Int32 port = 80;
+        private static String message = "data";
         public int Port { get; set; } = port;
-        public string Message { get; set; }
+        public string Message { get; set; } = message;
+        public string Host { get; set; }
+        //public Double Interval { get; set; }
 
-        public TcpProtocol()
+        public RequestStatus SendRequest(ILogger logger)
         {
-        }
-        public void SendRequest(ILogger loger)
-        {
-            throw new NotImplementedException();
+            try
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    client.Connect(hostname: Host, port: Port);
+                    var bytes = Encoding.ASCII.GetBytes(Message);
+                    var networkStream = client.GetStream();
+                    networkStream.Write(bytes, 0, bytes.Length);
+                    bytes = new byte[8];
+                    var readBytes = networkStream.Read(bytes, 0, bytes.Length);
+                    var responseData = Encoding.ASCII.GetString(bytes, 0, networkStream.Read(bytes, 0, readBytes));
+                    if (readBytes > 0)
+                    {
+                        return new RequestStatus(isSuccess:true);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Write(e);
+            }
+            return new RequestStatus(isSuccess: false);
         }
     }
 }

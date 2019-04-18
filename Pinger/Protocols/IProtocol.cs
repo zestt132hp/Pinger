@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Pinger.Logger;
 
 namespace Pinger.Protocols
 {
-    internal interface IProtocol
+    interface IProtocol
     {
-        void SendRequest(ILogger loger);
+        string Host { get; set; }
+        //Double Interval { get; set; }
+        RequestStatus SendRequest(ILogger logger);
     }
 }
