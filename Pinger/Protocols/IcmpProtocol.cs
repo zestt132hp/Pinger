@@ -38,15 +38,20 @@ namespace Pinger.Modules
                 {
                     var bytes = reply.Buffer;
                     var responseData = Encoding.ASCII.GetString(dataBytes, 0, bytes.Length);
-                    return new RequestStatus(reply.Status == IPStatus.Success) {Message = $"Получены данные {responseData}"};
+                    Message = $"Получены данные {responseData}";
+                    return new RequestStatus(reply.Status == IPStatus.Success);
                 }
                 else
-                    return new RequestStatus(false) {Message = $"Полученные даннные отсутвуют {nameof(reply)}"};
+                {
+                    Message = $"Полученные даннные отсутвуют {nameof(reply)}";
+                    return new RequestStatus(false);
+                }
             }
             catch (Exception ex)
             {
                 logger.Write(new Exception("Исключение при отправке запроса. \nТекст ошибки: " + ex));
-                return new RequestStatus(false) {Message = $"Ошибка при получании данных"};
+                Message = $"Ошибка при получении данных";
+                return new RequestStatus(false);
             }
         }
     }

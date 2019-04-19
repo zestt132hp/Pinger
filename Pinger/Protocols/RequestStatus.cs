@@ -10,7 +10,6 @@ namespace Pinger.Protocols
     class RequestStatus
     {
         public bool IsSucces { get; private set; }
-        public String Message { get; set; }
 
         public RequestStatus(bool isSuccess)
         {

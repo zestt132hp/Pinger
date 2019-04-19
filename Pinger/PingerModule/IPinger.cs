@@ -10,6 +10,6 @@ namespace Pinger.PingerModule
 {
     interface IPinger
     {
-        void Ping(IConfigReader host, Logger.ILogger logger);
+        void WorkProcessed(IConfigReader host, Logger.ILogger logger);
     }
 }

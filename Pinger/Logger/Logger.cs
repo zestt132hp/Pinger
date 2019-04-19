@@ -43,7 +43,7 @@ namespace Pinger.Logger
 
             lock (_logger)
             {
-                _logger.Trace(message);
+                _logger.Info(message);
             }
         }
 

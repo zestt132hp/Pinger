@@ -15,6 +15,8 @@ namespace Pinger.Modules
         private static HttpStatusCode _code = HttpStatusCode.OK;
         public Int16 StatusCode { get; private set; } = (Int16)_code;
 
+        public string Message { get; set; }
+
         public HttpProtocol(string hostname, HttpStatusCode statusCode)
         {
             _code = statusCode;
@@ -30,9 +32,9 @@ namespace Pinger.Modules
         {
             if (string.IsNullOrEmpty(hostName))
                 throw new ArgumentNullException(nameof(hostName));
-            if (!_regex.IsMatch(hostName))
-                _host = "http://" + hostName; //присваиваем по умолчанию 
-            _host = hostName;
+            if (_regex.IsMatch(hostName))
+                _host = hostName;
+            _host = "http://" + hostName; //присваиваем по умолчанию 
         }
         public string Host {
             get { return _host; }
@@ -47,6 +49,7 @@ namespace Pinger.Modules
             {
                 using (HttpWebResponse resp =(HttpWebResponse) WebRequest.Create(new Uri(Host)).GetResponse())
                 {
+                    Message = $"Получен ответ: {resp.StatusDescription}";
                     return new RequestStatus(resp.StatusCode == _code);
                 }
             }

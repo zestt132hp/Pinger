@@ -14,7 +14,7 @@ namespace Pinger.Logger
             FileTarget fileTarget = new FileTarget();
             config.AddTarget("file", fileTarget);
             consoleTarget.Layout = "${date:format=HH\\:MM\\:ss} ${logger} ${message}";
-            fileTarget.FileName = "${basedir}/LogResult.txt";
+            fileTarget.FileName = "${basedir}/"+logName + ".txt";
             fileTarget.Layout = "${message}";
             LoggingRule rule = new LoggingRule("*", LogLevel.Info, consoleTarget);
             config.LoggingRules.Add(rule);

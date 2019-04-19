@@ -37,14 +37,21 @@ namespace Pinger.PingerModule
             }
             else
                 option = keyPress.Aggregate((x, y) => x + " " + y);
+
             switch (option)
             {
                 case KeyOptions.Add:
                     return addMessage;
                 case KeyOptions.Quit:
                     Console.WriteLine("Приложение завершает свою работу");
-                    Thread.CurrentThread.Abort();
-                    Environment.Exit(0);
+                    try
+                    {
+                        Thread.CurrentThread.Abort();
+                    }
+                    catch (ThreadAbortException e)
+                    {
+                        Environment.Exit(0);
+                    }
                     return null;
                 case KeyOptions.Start:
                     return helloMessage;
@@ -73,7 +80,7 @@ namespace Pinger.PingerModule
 
         private void StartPinger(object state)
         {
-            pinger.Ping(reader, log);
+            pinger.WorkProcessed(reader, log);
         }
 
         public void ShowMessage(string message)
