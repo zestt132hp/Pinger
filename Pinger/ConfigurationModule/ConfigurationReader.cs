@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using Pinger.Modules;
-using Pinger.Protocols;
+using Pinger.PingerModule;
 
 namespace Pinger.ConfigurationModule
 {
@@ -13,7 +12,7 @@ namespace Pinger.ConfigurationModule
     {
         private static XElement rootNode;
         private static String configFileName { get; set; }
-        private static List<PingerProtocol>protocolsList= new List<PingerProtocol>();
+        private static List<PingProtocol>protocolsList= new List<PingProtocol>();
         public ConfigurationReader(String fileName)
         {
             string uri = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName;
@@ -32,7 +31,7 @@ namespace Pinger.ConfigurationModule
         {
             rootNode.Save(fileName);
         }
-        private static List<PingerProtocol> GetConfigEntry(CustomConfigAttribute attribute)
+        private static List<PingProtocol> GetConfigEntry(CustomConfigAttribute attribute)
         {
             if (rootNode == null)
             {
@@ -68,7 +67,7 @@ namespace Pinger.ConfigurationModule
             SetConfigEntry(customAttribute, entryValue);
         }
 
-        public IList<PingerProtocol> GetConfigEntry(Enum enumValue)
+        public IList<PingProtocol> GetConfigEntry(Enum enumValue)
         {
             Type type = enumValue.GetType();
             FieldInfo info = type.GetField(enumValue.ToString());
@@ -108,7 +107,7 @@ namespace Pinger.ConfigurationModule
 
     interface IConfigReader
     {
-        IList<PingerProtocol> GetConfigEntry(Enum enumValue);
+        IList<PingProtocol> GetConfigEntry(Enum enumValue);
         void SetConfigEntry(Enum enumValue, String entryValue);
     }
 }

@@ -9,7 +9,7 @@ namespace Pinger.GUI
 {
     interface IGui
     {
-        String Message(String[] keyPress);
-        void Run();
+        void ShowMessage(string message);
+        void RunGui();
     }
 }

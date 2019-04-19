@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Mime;
+using System.Net.NetworkInformation;
 using System.Threading;
+using Castle.Core.Logging;
+using Ninject;
 using Ninject.Infrastructure.Language;
 using Pinger.ConfigurationModule;
 using Pinger.GUI;
@@ -13,8 +16,17 @@ namespace Pinger.PingerModule
         private String helloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку 'pinger -help'";
         private string addMessage = "Введите хост --[Host] --[Interval/empty] --[Protocol] \n";
         private Logger.ILogger log;
-
-        public String Message(String[] keyPress)
+        private IPinger pinger;
+        private IKernel NinjectKernel;
+        private IConfigReader reader;
+        public ConsoleGui()
+        {
+            NinjectKernel = new StandardKernel(new PingerModule.PingerRegistrationModules());
+            log = NinjectKernel.Get<Logger.ILogger>();
+            pinger = NinjectKernel.Get<IPinger>();
+            reader = NinjectKernel.Get<IConfigReader>();
+        }
+        private String OptionsToWork(String[] keyPress)
         {
             string command;
             string option;
@@ -40,34 +52,44 @@ namespace Pinger.PingerModule
                 {
                     Console.WriteLine(
                         "Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл \n\n");
-                    ThreadPool.QueueUserWorkItem(Program.Run);
+                    ThreadPool.QueueUserWorkItem(StartPinger);
                         Thread.Sleep(200);
                     Console.WriteLine("введите команду для выхода [pinger -quit]");
-                    Message(Console.ReadLine()?.Split(' '));
+                    OptionsToWork(Console.ReadLine()?.Split(' '));
                     return null;
                 }
                 case KeyOptions.Help:
                 {
                     Console.WriteLine(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}")+"\n");
-                    Message(Console.ReadLine()?.Split(' '));
+                    OptionsToWork(Console.ReadLine()?.Split(' '));
                     return null;
                 }
                 default:
                     Console.WriteLine(
                         "Неизвестная опция! Повторите ввод или наберите 'pinger -help' для вызова справки \n\n");
-                    return Message(Console.ReadLine()?.Split(' '));
+                    return OptionsToWork(Console.ReadLine()?.Split(' '));
             }
         }
 
-        public void Run()
+        private void StartPinger(object state)
+        {
+            pinger.Ping(reader, log);
+        }
+
+        public void ShowMessage(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void RunGui()
         {
             string slash = "";
             for (int x = 0; x < Console.WindowWidth; x++)
                 slash += "-";
             Console.WriteLine(slash);
-            Console.WriteLine("\n" + Message("pinger start".Split(' ')) + "\n");
+            Console.WriteLine("\n" + OptionsToWork("pinger start".Split(' ')) + "\n");
             Console.WriteLine(slash);
-            Message(Console.ReadLine()?.Split(' '));
+            OptionsToWork(Console.ReadLine()?.Split(' '));
         }
     }
     internal struct KeyOptions

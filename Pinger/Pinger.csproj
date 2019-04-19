@@ -75,11 +75,10 @@
     <Compile Include="PingerModule\IPinger.cs" />
     <Compile Include="PingerModule\PingerRegistrationModules.cs" />
     <Compile Include="PingerModule\Pinger.cs" />
-    <Compile Include="PingerModule\PingResult.cs" />
     <Compile Include="Protocols\HttpProtocol.cs" />
     <Compile Include="Protocols\IcmpProtocol.cs" />
     <Compile Include="Protocols\IProtocol.cs" />
-    <Compile Include="Protocols\Protocol.cs" />
+    <Compile Include="PingerModule\PingProtocol.cs" />
     <Compile Include="Protocols\ProtocolCreator.cs" />
     <Compile Include="Protocols\RequestStatus.cs" />
     <Compile Include="Protocols\TcpProtocol.cs" />

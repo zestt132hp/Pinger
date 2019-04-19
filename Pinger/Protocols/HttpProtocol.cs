@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
+using Ninject.Activation;
+using NLog.Time;
 using Pinger.Logger;
-using Pinger.PingerModule;
 using Pinger.Protocols;
 
 namespace Pinger.Modules
@@ -11,13 +12,20 @@ namespace Pinger.Modules
     {
         private readonly Regex _regex = new Regex(string.Format("^(http|https)://"));
         private string _host;
-        private static HttpStatusCode code = HttpStatusCode.OK;
-        public Int16 StatusCode { get; set; } = (Int16)code;
+        private static HttpStatusCode _code = HttpStatusCode.OK;
+        public Int16 StatusCode { get; private set; } = (Int16)_code;
 
-        public HttpProtocol(string hostname)
+        public HttpProtocol(string hostname, HttpStatusCode statusCode)
         {
+            _code = statusCode;
             TryHost(hostname);
         }
+
+        public HttpProtocol(string hostName)
+        {
+            TryHost(hostName);
+        }
+
         private void TryHost(string hostName)
         {
             if (string.IsNullOrEmpty(hostName))
@@ -33,12 +41,20 @@ namespace Pinger.Modules
                 TryHost(value);
             } 
         }
-
-        //public Double Interval { get; set; }
-
-        public RequestStatus SendRequest(ILogger logger)
+        public RequestStatus SendRequest(ILogger logger) 
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (HttpWebResponse resp =(HttpWebResponse) WebRequest.Create(new Uri(Host)).GetResponse())
+                {
+                    return new RequestStatus(resp.StatusCode == _code);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Write(e);
+                return new RequestStatus(false);
+            }
         }
     }
 }

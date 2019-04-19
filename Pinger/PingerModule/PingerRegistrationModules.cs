@@ -4,9 +4,9 @@ using System.Net.NetworkInformation;
 using Ninject.Modules;
 using Pinger.ConfigurationModule;
 using Pinger.GUI;
+using Pinger.Logger;
 using Pinger.Modules;
 using Pinger.Protocols;
-using ILogger = Pinger.Logger.ILogger;
 
 namespace Pinger.PingerModule
 {
@@ -20,7 +20,7 @@ namespace Pinger.PingerModule
             Bind<IConfigReader>().To<ConfigurationReader>().WithConstructorArgument("PingerConfiguration.config");
             Bind<IPinger>().To<PingerModule.Pinger>();
             Bind<IGui>().To<ConsoleGui>();
-            Bind<ILogger>().To<Logger.Logger>();
+            Bind<Logger.ILogger>().To<Logger.Logger>().WithConstructorArgument("logger");
         }
     }
     
