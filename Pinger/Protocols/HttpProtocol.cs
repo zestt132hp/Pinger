@@ -15,6 +15,7 @@ namespace Pinger.Modules
         private static HttpStatusCode _code = HttpStatusCode.OK;
         public Int16 StatusCode { get; private set; } = (Int16)_code;
 
+        public string ProtocolName => "Http/Https";
         public string Message { get; set; }
 
         public HttpProtocol(string hostname, HttpStatusCode statusCode)

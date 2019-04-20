@@ -12,7 +12,7 @@ namespace Pinger.ConfigurationModule
     {
         [CustomConfig(
             Host = "AddressHost",
-            Protocol= "ProtocolType",
+            Protocol= "ProtocolName",
             Interval = "TimeInterval",
             HttpCode = "HttpStatusCode",
             Port = "PortTcp")]
@@ -22,10 +22,8 @@ namespace Pinger.ConfigurationModule
     public sealed class CustomConfigAttribute: Attribute
     {
         public object Host { get; set; }
-        [DefaultValue(1)]
         public object Interval { get; set; }
         public object Protocol { get; set; }
-        [DefaultValue(HttpStatusCode.OK)]
         public object HttpCode { get; set; }
         public object Port { get; set; }
     }

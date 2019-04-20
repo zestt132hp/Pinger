@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Pinger.PingerModule;
+using Pinger.Protocols;
 
 namespace Pinger.ConfigurationModule
 {
@@ -22,16 +23,11 @@ namespace Pinger.ConfigurationModule
                 configFileName = fileName;
             }
         }
-        private String FindConfigurationFile(string directoryPath)
-        {
-            return null;
-        }
-
         private static void SaveConfigFile(String fileName)
         {
             rootNode.Save(fileName);
         }
-        private static List<PingProtocol> GetConfigEntry(CustomConfigAttribute attribute)
+        private static List<PingProtocol> GetProtocolsFromConfig(CustomConfigAttribute attribute)
         {
             if (rootNode == null)
             {
@@ -53,7 +49,7 @@ namespace Pinger.ConfigurationModule
                 protocolsList.Add(Protocols.ProtocolCreator.CreateProtocol(item));
             return protocolsList;
         }
-        public void SetConfigEntry(Enum enumValue, string entryValue)
+        public void SaveInConfig(Enum enumValue, string entryValue)
         {
             if (entryValue == null)
             {
@@ -64,18 +60,58 @@ namespace Pinger.ConfigurationModule
             FieldInfo info = type.GetField(enumValue.ToString());
             var customAttribute = Attribute.GetCustomAttribute(info,
                 typeof(CustomConfigAttribute)) as CustomConfigAttribute;
-            SetConfigEntry(customAttribute, entryValue);
+            SaveInConfig(customAttribute, entryValue);
         }
 
-        public IList<PingProtocol> GetConfigEntry(Enum enumValue)
+        public Boolean AddInConfig(params string[] values)
+        {
+            if (!values.Any())
+                return false;
+            else
+            {
+                if (values.Length < typeof (CustomConfigAttribute).GetProperties().Length - 2)
+                {
+                    new CustomConfigAttribute() {Host = values.First(), Interval = values[1], Protocol = values.Last()};
+                    return true;
+                }
+                else
+                {
+                    new CustomConfigAttribute()
+                    {
+                        Host = values.First(),
+                        Interval = values[1],
+                        Protocol = values[values.Length - 2],
+                        HttpCode = values.Last()
+                    };
+                    return true;
+                }
+            }
+        }
+
+        public IList<IProtocol> GetHosts()
+        {
+            if (!protocolsList.Any())
+            {
+                GetProtocolsFromConfig(Configuration.RefreshRate);
+                GetHosts();
+            }
+            return protocolsList.Select(x => x.ProtocolInfo).ToList();
+        }
+
+        public void RemoveHost()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<PingProtocol> GetProtocolsFromConfig(Enum enumValue)
         {
             Type type = enumValue.GetType();
             FieldInfo info = type.GetField(enumValue.ToString());
             var customAttribute = Attribute.GetCustomAttribute(info,
                 typeof(CustomConfigAttribute)) as CustomConfigAttribute;
-            return GetConfigEntry(customAttribute);
+            return GetProtocolsFromConfig(customAttribute);
         }
-        private static void SetConfigEntry(CustomConfigAttribute attribute,
+        private static void SaveInConfig(CustomConfigAttribute attribute,
                                        String entryValue)
         {
             throw new NotImplementedException();
@@ -107,7 +143,11 @@ namespace Pinger.ConfigurationModule
 
     interface IConfigReader
     {
-        IList<PingProtocol> GetConfigEntry(Enum enumValue);
-        void SetConfigEntry(Enum enumValue, String entryValue);
+        IList<PingProtocol> GetProtocolsFromConfig(Enum enumValue);
+        void SaveInConfig(Enum enumValue, String entryValue);
+        Boolean AddInConfig(params string[] values);
+
+        IList<IProtocol> GetHosts();
+        void RemoveHost();
     }
 }

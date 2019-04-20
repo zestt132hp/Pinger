@@ -16,6 +16,7 @@ namespace Pinger.Modules
     {
         public string Host { get; set; }
         private static String _message = "data";
+        public string ProtocolName => "Icmp";
         public string Message { get; set; } = _message;
         public RequestStatus SendRequest(ILogger logger)
         {

@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Mime;
-using System.Net.NetworkInformation;
 using System.Threading;
-using Castle.Core.Logging;
 using Ninject;
-using Ninject.Infrastructure.Language;
 using Pinger.ConfigurationModule;
 using Pinger.GUI;
 
@@ -13,7 +9,7 @@ namespace Pinger.PingerModule
 {
     internal sealed class ConsoleGui: IGui
     {
-        private String helloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку 'pinger -help'";
+        private String helloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку [pinger -help]";
         private string addMessage = "Введите хост --[Host] --[Interval/empty] --[Protocol] \n";
         private Logger.ILogger log;
         private IPinger pinger;
@@ -28,7 +24,7 @@ namespace Pinger.PingerModule
         }
         private String OptionsToWork(String[] keyPress)
         {
-            string command;
+            string command="";
             string option;
             if (keyPress.Length > 2)
             {
@@ -41,9 +37,25 @@ namespace Pinger.PingerModule
             switch (option)
             {
                 case KeyOptions.Add:
-                    return addMessage;
+                {
+                    if (string.IsNullOrEmpty(command))
+                        Console.WriteLine("значение при добавлении не может быть пустым, " +
+                                          "\nвызовите справку или ввидите корректное значение для добавления хоста");
+                    else
+                    {
+                        if (command.Contains('[') || command.Contains(']'))
+                        {
+                            command = command.Remove(command.IndexOf('['));
+                            command = command.Remove(command.IndexOf(']'));
+                        }
+                        reader.AddInConfig(command.Split(' '));
+                    }
+                    OptionsToWork(Console.ReadLine().Split(' '));
+                    return null;
+                }
                 case KeyOptions.Quit:
                     Console.WriteLine("Приложение завершает свою работу");
+                    Thread.Sleep(1000);
                     try
                     {
                         Thread.CurrentThread.Abort();
@@ -65,6 +77,16 @@ namespace Pinger.PingerModule
                     OptionsToWork(Console.ReadLine()?.Split(' '));
                     return null;
                 }
+                case KeyOptions.Show:
+                {
+                    Console.WriteLine(reader.GetHosts().Count > 0
+                        ? reader.GetHosts()
+                            .Select(x => $"Host: {x.Host} Protocol: {x.ProtocolName}")
+                            .Aggregate((x, y) => x + "\n" + y)
+                        : "В конфигурационном файле отстувует список хостов, добавьте хост");
+                    OptionsToWork(Console.ReadLine().Split(' '));
+                    return null;
+                }
                 case KeyOptions.Help:
                 {
                     Console.WriteLine(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}")+"\n");
@@ -73,11 +95,10 @@ namespace Pinger.PingerModule
                 }
                 default:
                     Console.WriteLine(
-                        "Неизвестная опция! Повторите ввод или наберите 'pinger -help' для вызова справки \n\n");
+                        "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки \n\n");
                     return OptionsToWork(Console.ReadLine()?.Split(' '));
             }
         }
-
         private void StartPinger(object state)
         {
             pinger.WorkProcessed(reader, log);
@@ -112,7 +133,9 @@ namespace Pinger.PingerModule
         public static string[] GetHelpOptions()
         {
             return new[] {
-                Add + " - позволяет добавить имя хоста в конфигурационный файл \n \n \t Пример " + Add + " [wwww.yandex.ru 5 ICMP] \n",
+                Add + " - позволяет добавить имя хоста в конфигурационный файл \n \n \t Пример для ICMP протокола " + Add + " [wwww.yandex.ru 5 ICMP] \n" + 
+                "\t Пример для Http/Https протокола: [www.yandex.ru 16 http 200]\n \t - последняя цифра это статус-код \n" + 
+                "\t Пример для tcp/ip протокола: [10.200.224.94:50 15 tcp/ip]\n \t - через двоеточие указывается порт",
                 Quit + " - Завершает работу приложения",
                 Remove + " [№]  - удаляет хост с указанным номером",
                 Show  + " - Отображает сохраненные хосты из файла конфигураций",

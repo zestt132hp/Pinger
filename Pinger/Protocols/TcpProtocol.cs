@@ -12,11 +12,13 @@ namespace Pinger.Modules
     sealed class TcpProtocol: IProtocol
     {
         private static readonly string regExpressionForChekIp = @"^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}";
+        private static readonly string regExForPort = "|([:][0-9]{2,5})";
         private Regex reg = new Regex(regExpressionForChekIp);
         private static Int32 port = 80;
         private static String message = "data";
         private String _host;
         public int Port { get; set; } = port;
+        public string ProtocolName =>"Tcp/Ip";
         public string Message { get; set; } = message;
         public string Host {
             get { return _host; }
@@ -25,13 +27,29 @@ namespace Pinger.Modules
 
         public TcpProtocol(String hostName)
         {
+            if (hostName.Contains(":"))
+            {
+                string[] array = hostName.Split(':');
+
+            }
             TryHost(hostName);
         }
 
         private void TryHost(string hostName)
         {
-            if (reg.IsMatch(hostName))
-                _host = hostName;
+            if (new Regex(regExpressionForChekIp + regExForPort).IsMatch(hostName))
+            {
+                int port;
+                string[] array = hostName.Split(':');
+                _host = array[0];
+                Int32.TryParse(array[1], out port);
+            }
+            else
+            {
+                if (!reg.IsMatch(hostName))
+                    throw new FormatException("Некорретно введён адрес хоста");
+            }
+            _host = hostName;
         }
 
         public RequestStatus SendRequest(ILogger logger)

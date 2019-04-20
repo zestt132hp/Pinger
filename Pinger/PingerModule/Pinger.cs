@@ -15,7 +15,7 @@ namespace Pinger.PingerModule
             _logger = logger;
             try
             {
-                reader.GetConfigEntry(Configuration.RefreshRate).Map(x => { x.Start(logger); });
+                reader.GetProtocolsFromConfig(Configuration.RefreshRate).Map(x => { x.Start(logger); });
             }
             catch (Exception e)
             {
