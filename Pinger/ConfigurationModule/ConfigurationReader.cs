@@ -69,22 +69,9 @@ namespace Pinger.ConfigurationModule
                 return false;
             else
             {
-                if (values.Length < typeof (CustomConfigAttribute).GetProperties().Length - 2)
-                {
-                    new CustomConfigAttribute() {Host = values.First(), Interval = values[1], Protocol = values.Last()};
-                    return true;
-                }
-                else
-                {
-                    new CustomConfigAttribute()
-                    {
-                        Host = values.First(),
-                        Interval = values[1],
-                        Protocol = values[values.Length - 2],
-                        HttpCode = values.Last()
-                    };
-                    return true;
-                }
+                CustomConfigAttribute at = CustomConfigAttribute.CreateConfigAttribute(values);
+                SaveInConfig(at, configFileName);
+                return true;
             }
         }
 
@@ -111,9 +98,12 @@ namespace Pinger.ConfigurationModule
                 typeof(CustomConfigAttribute)) as CustomConfigAttribute;
             return GetProtocolsFromConfig(customAttribute);
         }
-        private static void SaveInConfig(CustomConfigAttribute attribute,
-                                       String entryValue)
+        private static void SaveInConfig(CustomConfigAttribute attribute)
         {
+            if (rootNode == null)
+                return;
+            var item = 
+
             throw new NotImplementedException();
             /*if (rootNode == null)
             {

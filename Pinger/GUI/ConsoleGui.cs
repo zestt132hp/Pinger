@@ -45,8 +45,8 @@ namespace Pinger.PingerModule
                     {
                         if (command.Contains('[') || command.Contains(']'))
                         {
-                            command = command.Remove(command.IndexOf('['));
-                            command = command.Remove(command.IndexOf(']'));
+                            command = command.Remove(command.IndexOf('['), 1);
+                            command = command.Remove(command.IndexOf(']'), 1);
                         }
                         reader.AddInConfig(command.Split(' '));
                     }

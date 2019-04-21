@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="ConfigurationModule\ConfigurationHelper.cs" />
     <Compile Include="ConfigurationModule\ConfigurationReader.cs" />
+    <Compile Include="GUI\ConsoleInputData.cs" />
     <Compile Include="GUI\IGui.cs" />
     <Compile Include="Logger\IConfigurationNlog.cs" />
     <Compile Include="Logger\ILogger.cs" />
