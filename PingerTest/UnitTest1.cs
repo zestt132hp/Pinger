@@ -36,5 +36,10 @@ namespace PingerTest
             request1.Timeout = 10;
             request1.GetRequestStream();
         }
+
+        public void SetInputsValueFromUITest()
+        {
+            
+        }
     }
 }

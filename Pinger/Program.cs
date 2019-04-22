@@ -5,6 +5,7 @@ using Ninject;
 using Pinger.ConfigurationModule;
 using Pinger.GUI;
 using Pinger.PingerModule;
+using Pinger.UI;
 
 namespace Pinger
 {
@@ -12,8 +13,8 @@ namespace Pinger
     {
         private static void Main(string[] args)
         {
-            IGui gui = new ConsoleGui();
-            gui.RunGui();
+            IUi ui = new ConsoleWorkProcessUi();
+            ui.RunGui();
         }
     }
 }

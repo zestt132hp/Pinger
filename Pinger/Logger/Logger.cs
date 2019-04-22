@@ -7,7 +7,7 @@ namespace Pinger.Logger
 {
     class Logger:ILogger
     {
-        private NLog.Logger _logger;// = LogManager.GetLogger("PingerLog");
+        private NLog.Logger _logger;
 
         public Logger(string logName)
         {

@@ -8,13 +8,12 @@ using Pinger.Protocols;
 
 namespace Pinger.Modules
 {
-    class HttpProtocol : IProtocol
+    class HttpProtocol :IProtocol
     {
         private readonly Regex _regex = new Regex(string.Format("^(http|https)://"));
         private string _host;
         private static HttpStatusCode _code = HttpStatusCode.OK;
         public Int16 StatusCode { get; private set; } = (Int16)_code;
-
         public string ProtocolName => "Http/Https";
         public string Message { get; set; }
 

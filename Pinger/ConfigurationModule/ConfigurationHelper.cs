@@ -52,5 +52,31 @@ namespace Pinger.ConfigurationModule
             }
             return conf;
         }
+
+        public static CustomConfigAttribute CreateConfigAttribute(Array values)
+        {
+            CustomConfigAttribute confAttr = new CustomConfigAttribute();
+            var properties = confAttr.GetType().GetProperties();
+            int index = 0;
+            foreach (var val in values)
+            {
+                properties.SetValue(val, index);
+                index++;
+            }
+            return confAttr;
+        }
+
+        public static String GetValueAttribute(String nameProperty)
+        {
+            var memInfo = typeof(Configuration).GetMember(Configuration.RefreshRate.ToString()).First();
+            var cusAttrobutes = memInfo.CustomAttributes.Select(x => x.NamedArguments).First();
+            for (int x = 0; x < cusAttrobutes.Count(); x++)
+            {
+                if (cusAttrobutes[x].MemberName == nameProperty)
+                    return cusAttrobutes[x].TypedValue.Value.ToString();
+            }
+
+            return null;
+        }
     }
 }

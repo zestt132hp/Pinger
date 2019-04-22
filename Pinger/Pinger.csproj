@@ -66,20 +66,20 @@
   <ItemGroup>
     <Compile Include="ConfigurationModule\ConfigurationHelper.cs" />
     <Compile Include="ConfigurationModule\ConfigurationReader.cs" />
-    <Compile Include="GUI\ConsoleInputData.cs" />
-    <Compile Include="GUI\IGui.cs" />
+    <Compile Include="UI\ConsoleInputData.cs" />
+    <Compile Include="UI\ConsoleOutputMessage.cs" />
+    <Compile Include="UI\IUi.cs" />
     <Compile Include="Logger\IConfigurationNlog.cs" />
     <Compile Include="Logger\ILogger.cs" />
     <Compile Include="Logger\Logger.cs" />
     <Compile Include="Logger\NLogConfiguration.cs" />
-    <Compile Include="GUI\ConsoleGui.cs" />
+    <Compile Include="UI\ConsoleWorkProcessUi.cs" />
     <Compile Include="PingerModule\IPinger.cs" />
     <Compile Include="PingerModule\PingerRegistrationModules.cs" />
-    <Compile Include="PingerModule\Pinger.cs" />
     <Compile Include="Protocols\HttpProtocol.cs" />
     <Compile Include="Protocols\IcmpProtocol.cs" />
     <Compile Include="Protocols\IProtocol.cs" />
-    <Compile Include="PingerModule\PingProtocol.cs" />
+    <Compile Include="PingerModule\Pinger.cs" />
     <Compile Include="Protocols\ProtocolCreator.cs" />
     <Compile Include="Protocols\RequestStatus.cs" />
     <Compile Include="Protocols\TcpProtocol.cs" />
@@ -91,7 +91,6 @@
     <None Include="ConfigurationModule\PingerConfiguration.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="ConfigurationModule\Configuration.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
