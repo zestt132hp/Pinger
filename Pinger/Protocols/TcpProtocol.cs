@@ -14,10 +14,18 @@ namespace Pinger.Modules
         private static readonly string regExpressionForChekIp = @"^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}";
         private static readonly string regExForPort = "|([:][0-9]{2,5})";
         private Regex reg = new Regex(regExpressionForChekIp);
-        private static Int32 port = 80;
+        private Int32 port;
         private static String message = "data";
         private String _host;
-        public int Port { get; set; } = port;
+
+        public int Port
+        {
+            get { return port; }
+            set {
+                port = value < 80 ? 80 : value;
+            }
+        }
+
         public string ProtocolName =>"Tcp/Ip";
         public string Message { get; set; } = message;
         public string Host {
@@ -27,11 +35,6 @@ namespace Pinger.Modules
 
         public TcpProtocol(String hostName)
         {
-            if (hostName.Contains(":"))
-            {
-                string[] array = hostName.Split(':');
-
-            }
             TryHost(hostName);
         }
 
@@ -39,7 +42,6 @@ namespace Pinger.Modules
         {
             if (hostName.Contains(":")&& new Regex(regExpressionForChekIp + regExForPort).IsMatch(hostName))
             {
-                int port;
                 string[] array = hostName.Split(':');
                 _host = array[0];
                 Int32.TryParse(array[1], out port);
@@ -48,8 +50,8 @@ namespace Pinger.Modules
             {
                 if (!reg.IsMatch(hostName))
                     throw new FormatException("Некорретно введён адрес хоста");
+                _host = hostName;
             }
-            _host = hostName;
         }
 
         public RequestStatus SendRequest(ILogger logger)
@@ -75,7 +77,7 @@ namespace Pinger.Modules
             {
                 logger.Write(e);
             }
-            return new RequestStatus(isSuccess: false);
+            return new RequestStatus(isSuccess: false) ;
         }
     }
 }

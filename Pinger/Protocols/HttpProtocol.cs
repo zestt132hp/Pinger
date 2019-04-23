@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using Ninject.Activation;
-using NLog.Time;
 using Pinger.Logger;
 using Pinger.Protocols;
 
@@ -34,14 +32,11 @@ namespace Pinger.Modules
                 throw new ArgumentNullException(nameof(hostName));
             if (_regex.IsMatch(hostName))
                 _host = hostName;
-            _host = "http://" + hostName; //присваиваем по умолчанию 
+            _host = "http://" + hostName;
         }
         public string Host {
-            get { return _host; }
-            set
-            {
-                TryHost(value);
-            } 
+            get => _host;
+            set => TryHost(value);
         }
         public RequestStatus SendRequest(ILogger logger) 
         {

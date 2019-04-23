@@ -11,25 +11,27 @@ namespace Pinger.UI
 {
     internal sealed class ConsoleWorkProcessUi: IUi
     {
-        private String helloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку [pinger -help]";
         private readonly Logger.ILogger _log;
         private readonly IPinger _pinger;
         private readonly IConfigWorker _worker;
-        readonly IConsoleUi _outMess;
+        readonly IConsoleOutputUi _outMess;
         readonly IInputsUi _inputs;
+        private ConsoleKeyInfo cki;
         public ConsoleWorkProcessUi()
         {
             IKernel injectKernel = new StandardKernel(new PingerModule.PingerRegistrationModules());
             _log = injectKernel.Get<Logger.ILogger>();
             _pinger = injectKernel.Get<IPinger>();
             _worker = injectKernel.Get<IConfigWorker>();
-            _outMess = injectKernel.Get<IConsoleUi>();
+            _outMess = injectKernel.Get<IConsoleOutputUi>();
             _inputs = injectKernel.Get<IInputsUi>();
             SetUiSettings();
         }
 
         private String OptionsToWork(String[] keyPress)
         {
+            if (keyPress == null)
+                return null;
             string command = "";
             string option;
             if (keyPress.Length > 2)
@@ -45,79 +47,133 @@ namespace Pinger.UI
                 case KeyOptions.Add:
                 {
                     if (string.IsNullOrEmpty(command))
-                        _outMess.ShowMessage("значение при добавлении не может быть пустым, " +
-                                             "\nвызовите справку или ввидите корректное значение для добавления хоста");
+                    {
+                        _outMess.PrintMessage("значение при добавлении не может быть пустым, ");
+                        _outMess.PrintMessage("вызовите справку или ввидите корректное значение для добавления хоста", "\n", false);
+                    }
+
                     else
                     {
-                        command = _inputs.VerifyString(command, "[", "]");
-                        _outMess.ShowMessage(_worker.SaveInConfig(command.Split(' '))
-                            ? "\nВведённые данные добавлены успешно! Введите следующую команду:"
-                            : "\nОшибка при вводе данных! Введите следующую команду:");
+                        try
+                        {
+                            if (_inputs.VerifyString(ref command, "[", "]"))
+                                _outMess.PrintMessage(
+                                    _worker.SaveInConfig(command.Split(' '))
+                                        ? "Введённые данные добавлены успешно! Введите следующую команду:"
+                                        : "Ошибка при вводе данных! Введите следующую команду:", "\n", false);
+                            else
+                                _outMess.PrintMessage("Ошибка при вводе данных! Введите следующую команду:", "\n",false);
+                        }
+                        catch (NotImplementedException e)
+                        {
+                            _outMess.PrintMessage(e.Message);
+                        }
                     }
+
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
                 case KeyOptions.Quit:
-                    _outMess.ShowMessage("Приложение завершает свою работу");
+                    _outMess.PrintMessage("Приложение завершает свою работу");
                     Thread.Sleep(1000);
                     try
                     {
                         Thread.CurrentThread.Abort();
                     }
-                    catch (ThreadAbortException e)
+                    catch (ThreadAbortException)
                     {
                         Environment.Exit(0);
                     }
+
                     return null;
                 case KeyOptions.Start:
-                    return helloMessage;
+                    return KeyOptions.HelloMessage;
                 case KeyOptions.Ping:
                 {
-                    _outMess.ShowMessage(
-                        "Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл \n\n");
+                    _outMess.PrintMessage("Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл");
+                    _outMess.PrintMessage("Для отмены нажмите Any Key или для выхода Ctrl+C", "\n", true);
+                    Thread.Sleep(1000);
                     ThreadPool.QueueUserWorkItem(StartPingProcess);
+                    Console.CancelKeyPress += KeyPress;
                     Thread.Sleep(200);
-                    _outMess.ShowMessage("введите команду для выхода [pinger -quit]");
+                    cki = Console.ReadKey(false);
+                    if (cki != null)
+                    {
+                        _pinger.StopWork();
+                        Thread.CurrentThread.Join(2000);
+                    }
+
+                    Thread.Sleep(3005);
+                    _outMess.PrintMessage("Процесс остановлен введите команду...", "\n", false);
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
                 case KeyOptions.Show:
                 {
-                    if (_worker.GetFromConfig().Count > 0)
+                    try
                     {
-                        foreach (KeyValuePair<int, Pinger.PingerModule.Pinger> value in _worker.GetFromConfig())
+                        if (_worker.GetFromConfig().Count > 0)
                         {
-                            _outMess.ShowMessage(
-                                $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
+                            foreach (KeyValuePair<int, Pinger.PingerModule.Pinger> value in _worker.GetFromConfig())
+                            {
+                                _outMess.PrintMessage(
+                                    $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
+                            }
                         }
+                        else
+                            _outMess.PrintMessage("В конфигурационном файле отстувует список хостов, добавьте хост");
                     }
-                    else
-                        _outMess.ShowMessage("В конфигурационном файле отстувует список хостов, добавьте хост");
-                    OptionsToWork(_inputs.ValuesFromUi());
+                    catch (NotImplementedException e)
+                    {
+                        _outMess.PrintMessage(e.Message);
+                    }
+                    finally
+                    {
+                        OptionsToWork(_inputs.ValuesFromUi());
+                    }
+
                     return null;
                 }
                 case KeyOptions.Help:
                 {
-                    _outMess.ShowMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}") + "\n");
+                    _outMess.PrintMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}"));
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
                 case KeyOptions.Remove:
                 {
-                    command = _inputs.VerifyString(command, "[", "]");
-                    int index;
-                    if (Int32.TryParse(command, out index))
-                        _worker.RemoveFromConfig(index);
+                    if (!_inputs.VerifyString(ref command, "[", "]"))
+                        _outMess.PrintMessage("Введенные данные не верны");
+                    if (Int32.TryParse(command, out var index))
+                    {
+                        _outMess.PrintMessage(_worker.RemoveFromConfig(index) ? "Протокол удалён" : "Ошибка удаления");
+                    }
                     else
-                        _outMess.ShowMessage("Вы ввели неверный параметр, пожалуйста пробуйте ввести заново");
+                        _outMess.PrintMessage("Вы ввели неверный параметр, пожалуйста пробуйте ввести заново");
+
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
+                case KeyOptions.Stop:
+                    _pinger.StopWork();
+                    _outMess.PrintMessage("Введите процесс опроса остановлен, введите команду:");
+                    OptionsToWork((_inputs.ValuesFromUi()));
+                    return null;
                 default:
-                    Console.WriteLine(
-                        "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки \n\n");
+                    _outMess.PrintMessage(
+                        "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки" , "\n", true);
                     return OptionsToWork(_inputs.ValuesFromUi());
             }
+        }
+
+        private void KeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            _outMess.PrintMessage("Остановка рабчего процесса");
+            _pinger.StopWork();
+            e.Cancel = true;
+            _outMess.PrintMessage("Все процессы остановлены программа будет завершена через 5 сек.");
+            Thread.Sleep(500);
+            Environment.Exit(0);
         }
 
         private void StartPingProcess(object state)
@@ -129,8 +185,7 @@ namespace Pinger.UI
         {
             Console.SetWindowSize((int) (Console.LargestWindowWidth * 0.28),
                 (int) (Console.LargestWindowHeight * 0.28));
-            Console.SetBufferSize((int) (Console.LargestWindowWidth * 0.28),
-                (int) (Console.LargestWindowHeight * 0.28));
+            Console.SetBufferSize((int) (Console.LargestWindowWidth * 0.28), Console.BufferHeight);
         }
 
         public void RunGui()
@@ -139,7 +194,7 @@ namespace Pinger.UI
             for (int x = 0; x < Console.WindowWidth; x++)
                 slash += "-";
             slash = slash + "\n" + OptionsToWork("pinger start".Split(' ')) + "\n\n" + slash;
-            _outMess.ShowMessage(slash);
+            _outMess.PrintMessage(slash);
             OptionsToWork(_inputs.ValuesFromUi());
         }
     }
@@ -152,19 +207,21 @@ namespace Pinger.UI
         public const String Show = "pinger -show";
         public const String Start = "pinger start";
         public const String Ping = "pinger -ping";
+        public const String Stop = "s";
 
         public static string[] GetHelpOptions()
         {
             return new[] {
-                Add + " - позволяет добавить имя хоста в конфигурационный файл \n \n \t Пример для ICMP протокола " + Add + " [wwww.yandex.ru 5 ICMP] \n" +
-                "\t Пример для Http/Https протокола: [www.yandex.ru 16 http 200]\n \t - последняя цифра это статус-код \n" +
-                "\t Пример для tcp/ip протокола: [10.200.224.94:50 15 tcp/ip]\n \t - через двоеточие указывается порт",
+                Add + " - позволяет добавить имя хоста в конфигурационный файл \nПример для ICMP протокола " + Add + " [wwww.yandex.ru 5 ICMP] \n" +
+                "Пример для Http/Https протокола: [www.yandex.ru 16 http 200]\n - последняя цифра это статус-код \n" +
+                "Пример для tcp/ip протокола: [10.200.224.94:50 15 tcp/ip]\n - через двоеточие указывается порт",
                 Quit + " - Завершает работу приложения",
                 Remove + " [№]  - удаляет хост с указанным номером",
                 Show  + " - Отображает сохраненные хосты из файла конфигураций",
-                Ping + " - Запускает опрос указанных хостов в конфиг файле"
+                Ping + " - Запускает опрос указанных хостов в конфиг-файле"
             };
         }
+        public const String HelloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку [pinger -help]";
     }
 
    

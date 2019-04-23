@@ -17,9 +17,9 @@ namespace Pinger.PingerModule
         public override void Load()
         {
             Bind<IConfigWorker>().To<ConfigurationWorker>().WithConstructorArgument("PingerConfiguration.config");
-            Bind<IPinger>().To<Pinger>();
+            Bind<IPinger>().To<PingerProcessor>();
             Bind<IUi>().To<ConsoleWorkProcessUi>();
-            Bind<IConsoleUi>().To<ConsoleOutputMessage>();
+            Bind<IConsoleOutputUi>().To<ConsoleOutputOutputMessage>();
             Bind<IInputsUi>().To<ConsoleInputData>();
             Bind<Logger.ILogger>().To<Logger.Logger>().WithConstructorArgument("logger");
         }

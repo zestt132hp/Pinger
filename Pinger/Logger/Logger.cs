@@ -1,14 +1,11 @@
 ﻿using System;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using NLog;
-using NLog.Fluent;
 
 namespace Pinger.Logger
 {
     class Logger:ILogger
     {
-        private NLog.Logger _logger;
-
+        private readonly NLog.Logger _logger;
         public Logger(string logName)
         {
             IConfigurationNlog config = new NlogConfiguration();
@@ -35,6 +32,10 @@ namespace Pinger.Logger
             }
             catch (Exception e)
             {
+                lock (_logger)
+                {
+                    _logger?.Info(e.Message + "\n" + e.StackTrace);
+                }
             }
         }
 
@@ -43,14 +44,16 @@ namespace Pinger.Logger
 
             lock (_logger)
             {
-                _logger.Info(message);
+                _logger.Debug(message);
             }
         }
 
         private void WriteException(Exception message)
         {
-            lock(_logger)
+            lock (_logger)
+            {
                 _logger.Error(message);
+            }
         }
     }
 }

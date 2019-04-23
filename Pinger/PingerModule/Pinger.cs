@@ -11,13 +11,28 @@ namespace Pinger.PingerModule
     {
         private System.Timers.Timer _timer;
         private IProtocol _protocol;
-        private static Int32 _interval = 5;
+        private Int32 _interval = 5;
         private Logger.ILogger _logger;
         public IProtocol Protocol {
             get { return _protocol; }
             set { _protocol = value; }
         }
-        public Int32 Interval { get; private set; } = _interval;
+
+        public Int32 Interval
+        {
+            get { return _interval; }
+            private set
+            {
+                if (value > 0)
+                    _interval = value;
+            }
+        }
+
+        public void StopWork()
+        {
+            StopTimer();
+        }
+
         public void SetInterval(string value)
         {
             Int32 tmp;
@@ -44,11 +59,13 @@ namespace Pinger.PingerModule
 
         public void StopTimer()
         {
+            if (_timer == null)
+                return;
             _timer.Stop();
             _timer.Dispose();
         }
 
-        public void StartWork( ILogger logger)
+        public void StartWork(ILogger logger)
         {
             if (Protocol == null)
                 return;

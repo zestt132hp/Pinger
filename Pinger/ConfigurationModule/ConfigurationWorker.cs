@@ -114,9 +114,9 @@ namespace Pinger.ConfigurationModule
             if (!ListProtocols.Any())
             {
                 Refresh?.Invoke(this, new EventArgs());
-                GetFromConfig();
                 if (!ListProtocols.Any())
-                    return null;
+                    return ListProtocols;
+                GetFromConfig();
             }
             return ListProtocols;
         }

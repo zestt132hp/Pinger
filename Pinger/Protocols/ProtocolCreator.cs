@@ -39,10 +39,8 @@ namespace Pinger.Protocols
                 case "tcp/ip":
                 case "tcp":
                 case "ip":
-                    int port;
-                    pProtocol = Int32.TryParse(data.Port?.ToString(), out port)
-                        ? new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString()) {Port = port}}
-                        : new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString())};
+                    pProtocol = new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString())};
+                    pProtocol.SetInterval(data.Interval.ToString());
                     return pProtocol;
                 default:
                     throw new NotImplementedException(

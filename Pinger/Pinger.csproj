@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="ConfigurationModule\ConfigurationHelper.cs" />
     <Compile Include="ConfigurationModule\ConfigurationWorker.cs" />
+    <Compile Include="PingerModule\PingerProcessor.cs" />
     <Compile Include="UI\ConsoleInputData.cs" />
     <Compile Include="UI\ConsoleOutputMessage.cs" />
     <Compile Include="UI\IUi.cs" />

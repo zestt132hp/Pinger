@@ -30,7 +30,7 @@ namespace Pinger.Modules
                 var ipHostEntry = Dns.GetHostEntry(Host);
                 var ipAddress = ipHostEntry.AddressList.FirstOrDefault();
                 options.DontFragment = true;
-                var dataBytes = Encoding.ASCII.GetBytes(Message);
+                var dataBytes = Encoding.UTF8.GetBytes(_message);
                 if (ipAddress != null)
                 {
                     reply = pingSender.Send(ipAddress, timeout, dataBytes, options);
@@ -38,7 +38,7 @@ namespace Pinger.Modules
                 if (reply != null)
                 {
                     var bytes = reply.Buffer;
-                    var responseData = Encoding.ASCII.GetString(dataBytes, 0, bytes.Length);
+                    var responseData = Encoding.UTF8.GetString(dataBytes, 0, bytes.Length);
                     Message = $"Получены данные {responseData}";
                     return new RequestStatus(reply.Status == IPStatus.Success);
                 }
