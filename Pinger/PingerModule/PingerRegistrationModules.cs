@@ -16,7 +16,7 @@ namespace Pinger.PingerModule
     {
         public override void Load()
         {
-            Bind<IConfigReader>().To<ConfigurationReader>().WithConstructorArgument("PingerConfiguration.config");
+            Bind<IConfigWorker>().To<ConfigurationWorker>().WithConstructorArgument("PingerConfiguration.config");
             Bind<IPinger>().To<Pinger>();
             Bind<IUi>().To<ConsoleWorkProcessUi>();
             Bind<IConsoleUi>().To<ConsoleOutputMessage>();

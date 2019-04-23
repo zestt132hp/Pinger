@@ -37,7 +37,7 @@ namespace Pinger.Modules
 
         private void TryHost(string hostName)
         {
-            if (new Regex(regExpressionForChekIp + regExForPort).IsMatch(hostName))
+            if (hostName.Contains(":")&& new Regex(regExpressionForChekIp + regExForPort).IsMatch(hostName))
             {
                 int port;
                 string[] array = hostName.Split(':');

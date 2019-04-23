@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Ninject;
@@ -13,7 +14,7 @@ namespace Pinger.UI
         private String helloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку [pinger -help]";
         private readonly Logger.ILogger _log;
         private readonly IPinger _pinger;
-        private readonly IConfigReader _reader;
+        private readonly IConfigWorker _worker;
         readonly IConsoleUi _outMess;
         readonly IInputsUi _inputs;
         public ConsoleWorkProcessUi()
@@ -21,14 +22,15 @@ namespace Pinger.UI
             IKernel injectKernel = new StandardKernel(new PingerModule.PingerRegistrationModules());
             _log = injectKernel.Get<Logger.ILogger>();
             _pinger = injectKernel.Get<IPinger>();
-            _reader = injectKernel.Get<IConfigReader>();
+            _worker = injectKernel.Get<IConfigWorker>();
             _outMess = injectKernel.Get<IConsoleUi>();
             _inputs = injectKernel.Get<IInputsUi>();
             SetUiSettings();
         }
+
         private String OptionsToWork(String[] keyPress)
         {
-            string command="";
+            string command = "";
             string option;
             if (keyPress.Length > 2)
             {
@@ -44,16 +46,11 @@ namespace Pinger.UI
                 {
                     if (string.IsNullOrEmpty(command))
                         _outMess.ShowMessage("значение при добавлении не может быть пустым, " +
-                                          "\nвызовите справку или ввидите корректное значение для добавления хоста");
+                                             "\nвызовите справку или ввидите корректное значение для добавления хоста");
                     else
                     {
-                        if (command.Contains('[') || command.Contains(']'))
-                        {
-                            command = command.Remove(command.IndexOf('['), 1);
-                            command = command.Remove(command.IndexOf(']'), 1);
-                        }
-
-                        _outMess.ShowMessage(_reader.AddHostInConfig(command.Split(' '))
+                        command = _inputs.VerifyString(command, "[", "]");
+                        _outMess.ShowMessage(_worker.SaveInConfig(command.Split(' '))
                             ? "\nВведённые данные добавлены успешно! Введите следующую команду:"
                             : "\nОшибка при вводе данных! Введите следующую команду:");
                     }
@@ -79,25 +76,40 @@ namespace Pinger.UI
                     _outMess.ShowMessage(
                         "Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл \n\n");
                     ThreadPool.QueueUserWorkItem(StartPingProcess);
-                        Thread.Sleep(200);
+                    Thread.Sleep(200);
                     _outMess.ShowMessage("введите команду для выхода [pinger -quit]");
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
                 case KeyOptions.Show:
                 {
-                    throw new NotImplementedException();/*
-                    _outMess.ShowMessage(_reader.GetHosts().Count > 0
-                        ? _reader.GetHosts()
-                            .Select(x => $"Host: {x.Host} Protocol: {x.ProtocolName}")
-                            .Aggregate((x, y) => x + "\n" + y)
-                        : "В конфигурационном файле отстувует список хостов, добавьте хост");
-                        OptionsToWork(_inputs.ValuesFromUi());
-                    return null;*/
+                    if (_worker.GetFromConfig().Count > 0)
+                    {
+                        foreach (KeyValuePair<int, Pinger.PingerModule.Pinger> value in _worker.GetFromConfig())
+                        {
+                            _outMess.ShowMessage(
+                                $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
+                        }
                     }
+                    else
+                        _outMess.ShowMessage("В конфигурационном файле отстувует список хостов, добавьте хост");
+                    OptionsToWork(_inputs.ValuesFromUi());
+                    return null;
+                }
                 case KeyOptions.Help:
                 {
-                    _outMess.ShowMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}")+"\n");
+                    _outMess.ShowMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}") + "\n");
+                    OptionsToWork(_inputs.ValuesFromUi());
+                    return null;
+                }
+                case KeyOptions.Remove:
+                {
+                    command = _inputs.VerifyString(command, "[", "]");
+                    int index;
+                    if (Int32.TryParse(command, out index))
+                        _worker.RemoveFromConfig(index);
+                    else
+                        _outMess.ShowMessage("Вы ввели неверный параметр, пожалуйста пробуйте ввести заново");
                     OptionsToWork(_inputs.ValuesFromUi());
                     return null;
                 }
@@ -107,6 +119,7 @@ namespace Pinger.UI
                     return OptionsToWork(_inputs.ValuesFromUi());
             }
         }
+
         private void StartPingProcess(object state)
         {
             _pinger.StartWork(_log);

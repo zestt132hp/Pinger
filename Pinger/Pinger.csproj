@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigurationModule\ConfigurationHelper.cs" />
-    <Compile Include="ConfigurationModule\ConfigurationReader.cs" />
+    <Compile Include="ConfigurationModule\ConfigurationWorker.cs" />
     <Compile Include="UI\ConsoleInputData.cs" />
     <Compile Include="UI\ConsoleOutputMessage.cs" />
     <Compile Include="UI\IUi.cs" />

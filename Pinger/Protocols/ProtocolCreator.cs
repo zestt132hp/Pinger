@@ -40,7 +40,7 @@ namespace Pinger.Protocols
                 case "tcp":
                 case "ip":
                     int port;
-                    pProtocol = Int32.TryParse(data.Port.ToString(), out port)
+                    pProtocol = Int32.TryParse(data.Port?.ToString(), out port)
                         ? new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString()) {Port = port}}
                         : new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString())};
                     return pProtocol;
