@@ -2,14 +2,14 @@
 
 namespace Pinger.UI
 {
-    interface IConsoleOutputUi
+    public interface IConsoleOutputUi
     {
         void PrintMessage(string message);
         void PrintMessage(string message, string tab, bool endRow);
     }
 
 
-    internal class ConsoleOutputOutputMessage : IConsoleOutputUi
+    public class ConsoleOutputOutputMessage : IConsoleOutputUi
     {
         public void PrintMessage(string message)
         {

@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Pinger</RootNamespace>
     <AssemblyName>Pinger</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="ConfigurationModule\ConfigurationHelper.cs" />
     <Compile Include="ConfigurationModule\ConfigurationWorker.cs" />
+    <Compile Include="PingerModule\IPingerProcessor.cs" />
     <Compile Include="PingerModule\PingerProcessor.cs" />
     <Compile Include="UI\ConsoleInputData.cs" />
     <Compile Include="UI\ConsoleOutputMessage.cs" />

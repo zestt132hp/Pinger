@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Linq;
 using System.Timers;
-using Pinger.ConfigurationModule;
 using Pinger.Logger;
 using Pinger.Protocols;
 
 namespace Pinger.PingerModule
 {
-    internal class Pinger : IPinger
+    public class Pinger : IPinger
     {
-        private System.Timers.Timer _timer;
+        private Timer _timer;
         private IProtocol _protocol;
         private Int32 _interval = 5;
-        private Logger.ILogger _logger;
+        private ILogger _logger;
         public IProtocol Protocol {
             get { return _protocol; }
             set { _protocol = value; }
@@ -21,7 +19,7 @@ namespace Pinger.PingerModule
         public Int32 Interval
         {
             get { return _interval; }
-            private set
+            set
             {
                 if (value > 0)
                     _interval = value;
@@ -42,7 +40,7 @@ namespace Pinger.PingerModule
 
         public void StartTimer()
         {
-            _timer = new System.Timers.Timer(Interval);
+            _timer = new Timer(Interval);
             _timer.Elapsed += OnTimedEvent;
             _timer.AutoReset = true;
             _timer.Enabled = true;

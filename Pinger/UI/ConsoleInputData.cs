@@ -1,9 +1,9 @@
 ﻿using System;
 using Ninject.Infrastructure.Language;
 
-namespace Pinger.GUI
+namespace Pinger.UI
 {
-    internal class ConsoleInputData : IInputsUi
+    public class ConsoleInputData : IInputsUi
     {
         public String[] ValuesFromUi()
         {

@@ -1,16 +1,23 @@
 ﻿using System;
+using Ninject;
 using NLog;
+using Pinger.PingerModule;
+using Pinger.UI;
 
 namespace Pinger.Logger
 {
-    class Logger:ILogger
+    public class Logger:ILogger
     {
         private readonly NLog.Logger _logger;
+        private IConsoleOutputUi _output;
+
         public Logger(string logName)
         {
-            IConfigurationNlog config = new NlogConfiguration();
-            LogManager.Configuration = config.GetLogConfiguration(logName);
-            _logger = LogManager.GetLogger(logName);
+            var name = string.IsNullOrEmpty(logName) ? DateTime.Now.ToShortDateString() : logName;
+            _logger = LogManager.GetCurrentClassLogger();
+            var configuration = PingerRegistrationModules.GetKernel().Get<IConfigurationNlog>();
+            LogManager.Configuration = configuration.GetLogConfiguration(name);
+            _output = PingerRegistrationModules.GetKernel().Get<IConsoleOutputUi>();
         }
 
         public void Write<T>(T message)
@@ -27,15 +34,11 @@ namespace Pinger.Logger
                 if (s != null)
                 {
                     WriteMessage(s);
-                    return;
                 }
             }
             catch (Exception e)
             {
-                lock (_logger)
-                {
-                    _logger?.Info(e.Message + "\n" + e.StackTrace);
-                }
+                _output.PrintMessage(e.Message, "\n", true);
             }
         }
 
@@ -44,6 +47,7 @@ namespace Pinger.Logger
 
             lock (_logger)
             {
+                _logger.Info(message);
                 _logger.Debug(message);
             }
         }

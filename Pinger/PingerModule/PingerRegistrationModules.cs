@@ -1,27 +1,27 @@
-﻿using System;
-using System.Net;
-using System.Net.NetworkInformation;
-using Ninject;
+﻿using Ninject;
 using Ninject.Modules;
 using Pinger.ConfigurationModule;
-using Pinger.GUI;
 using Pinger.Logger;
-using Pinger.Modules;
-using Pinger.Protocols;
 using Pinger.UI;
 
 namespace Pinger.PingerModule
 {
-    class PingerRegistrationModules:NinjectModule
+    public class PingerRegistrationModules:NinjectModule
     {
+        private static IKernel _kernel;
         public override void Load()
         {
             Bind<IConfigWorker>().To<ConfigurationWorker>().WithConstructorArgument("PingerConfiguration.config");
-            Bind<IPinger>().To<PingerProcessor>();
+            Bind<IConfigurationNlog>().To<NlogConfiguration>();
+            Bind<IPingerProcessor>().To<PingerProcessor>();
             Bind<IUi>().To<ConsoleWorkProcessUi>();
             Bind<IConsoleOutputUi>().To<ConsoleOutputOutputMessage>();
             Bind<IInputsUi>().To<ConsoleInputData>();
-            Bind<Logger.ILogger>().To<Logger.Logger>().WithConstructorArgument("logger");
+            Bind<ILogger>().To<Logger.Logger>().WithConstructorArgument("");
+        }
+        public static IKernel GetKernel()
+        {
+            return _kernel ?? (_kernel = new StandardKernel(new PingerRegistrationModules()));
         }
     }
     

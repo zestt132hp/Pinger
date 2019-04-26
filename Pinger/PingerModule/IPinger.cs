@@ -1,10 +1,10 @@
-﻿using Pinger.Logger;
+﻿using Pinger.Protocols;
 
 namespace Pinger.PingerModule
 {
-    interface IPinger
+    public interface IPinger:IPingerProcessor
     {
-        void StartWork(ILogger logger);
-        void StopWork();
+        IProtocol Protocol { get; }
+        int Interval { get; set; }
     }
 }

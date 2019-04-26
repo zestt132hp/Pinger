@@ -2,36 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Ninject;
 using Pinger.ConfigurationModule;
-using Pinger.GUI;
 using Pinger.PingerModule;
 
 namespace Pinger.UI
 {
-    internal sealed class ConsoleWorkProcessUi: IUi
+    public sealed class ConsoleWorkProcessUi: IUi
     {
         private readonly Logger.ILogger _log;
-        private readonly IPinger _pinger;
+        private readonly IPingerProcessor _pinger;
         private readonly IConfigWorker _worker;
         readonly IConsoleOutputUi _outMess;
         readonly IInputsUi _inputs;
-        private ConsoleKeyInfo cki;
+        public IKernel InjectKernel;
+        private ConsoleKeyInfo _cki;
+
         public ConsoleWorkProcessUi()
         {
-            IKernel injectKernel = new StandardKernel(new PingerModule.PingerRegistrationModules());
-            _log = injectKernel.Get<Logger.ILogger>();
-            _pinger = injectKernel.Get<IPinger>();
-            _worker = injectKernel.Get<IConfigWorker>();
-            _outMess = injectKernel.Get<IConsoleOutputUi>();
-            _inputs = injectKernel.Get<IInputsUi>();
+            InjectKernel = PingerRegistrationModules.GetKernel();
+            _log = InjectKernel.Get<Logger.ILogger>();
+            _pinger = InjectKernel.Get<IPingerProcessor>();
+            _worker = InjectKernel.Get<IConfigWorker>();
+            _outMess = InjectKernel.Get<IConsoleOutputUi>();
+            _inputs = InjectKernel.Get<IInputsUi>();
             SetUiSettings();
         }
 
-        private String OptionsToWork(String[] keyPress)
+        public void OptionsToWork(String[] keyPress)
         {
             if (keyPress == null)
-                return null;
+                throw new ArgumentNullException("Введено пустое значение команды");
             string command = "";
             string option;
             if (keyPress.Length > 2)
@@ -46,82 +48,36 @@ namespace Pinger.UI
             {
                 case KeyOptions.Add:
                 {
-                    if (string.IsNullOrEmpty(command))
-                    {
+                    if (!_inputs.VerifyString(ref command))
                         _outMess.PrintMessage("значение при добавлении не может быть пустым, ");
-                        _outMess.PrintMessage("вызовите справку или ввидите корректное значение для добавления хоста", "\n", false);
-                    }
-
-                    else
-                    {
-                        try
-                        {
-                            if (_inputs.VerifyString(ref command, "[", "]"))
-                                _outMess.PrintMessage(
-                                    _worker.SaveInConfig(command.Split(' '))
-                                        ? "Введённые данные добавлены успешно! Введите следующую команду:"
-                                        : "Ошибка при вводе данных! Введите следующую команду:", "\n", false);
-                            else
-                                _outMess.PrintMessage("Ошибка при вводе данных! Введите следующую команду:", "\n",false);
-                        }
-                        catch (NotImplementedException e)
-                        {
-                            _outMess.PrintMessage(e.Message);
-                        }
-                    }
-
+                    _outMess.PrintMessage("вызовите справку или ввидите корректное значение для добавления хоста",
+                        "\n", false);
+                    CommandAdd(command);
                     OptionsToWork(_inputs.ValuesFromUi());
-                    return null;
+                    break;
                 }
                 case KeyOptions.Quit:
                     _outMess.PrintMessage("Приложение завершает свою работу");
+                    Console.CancelKeyPress -= KeyPress;
                     Thread.Sleep(1000);
-                    try
-                    {
-                        Thread.CurrentThread.Abort();
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        Environment.Exit(0);
-                    }
-
-                    return null;
+                    Environment.Exit(0);
+                    break;
                 case KeyOptions.Start:
-                    return KeyOptions.HelloMessage;
+                    _outMess.PrintMessage(KeyOptions.HelloMessage);
+                    break;
                 case KeyOptions.Ping:
                 {
-                    _outMess.PrintMessage("Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл");
-                    _outMess.PrintMessage("Для отмены нажмите Any Key или для выхода Ctrl+C", "\n", true);
-                    Thread.Sleep(1000);
-                    ThreadPool.QueueUserWorkItem(StartPingProcess);
+                    if (!CommandPing(command))
+                        _outMess.PrintMessage("Неверная команда для старта пингования");
                     Console.CancelKeyPress += KeyPress;
-                    Thread.Sleep(200);
-                    cki = Console.ReadKey(false);
-                    if (cki != null)
-                    {
-                        _pinger.StopWork();
-                        Thread.CurrentThread.Join(2000);
-                    }
-
-                    Thread.Sleep(3005);
-                    _outMess.PrintMessage("Процесс остановлен введите команду...", "\n", false);
                     OptionsToWork(_inputs.ValuesFromUi());
-                    return null;
+                    break;
                 }
                 case KeyOptions.Show:
                 {
                     try
                     {
-                        if (_worker.GetFromConfig().Count > 0)
-                        {
-                            foreach (KeyValuePair<int, Pinger.PingerModule.Pinger> value in _worker.GetFromConfig())
-                            {
-                                _outMess.PrintMessage(
-                                    $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
-                            }
-                        }
-                        else
-                            _outMess.PrintMessage("В конфигурационном файле отстувует список хостов, добавьте хост");
+                        CommandShow();
                     }
                     catch (NotImplementedException e)
                     {
@@ -131,20 +87,20 @@ namespace Pinger.UI
                     {
                         OptionsToWork(_inputs.ValuesFromUi());
                     }
-
-                    return null;
+                    break;
                 }
                 case KeyOptions.Help:
                 {
-                    _outMess.PrintMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}"));
+                    _outMess.PrintMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}"), "\n", false);
                     OptionsToWork(_inputs.ValuesFromUi());
-                    return null;
+                        break;
                 }
                 case KeyOptions.Remove:
                 {
                     if (!_inputs.VerifyString(ref command, "[", "]"))
                         _outMess.PrintMessage("Введенные данные не верны");
-                    if (Int32.TryParse(command, out var index))
+                    int index;
+                    if (Int32.TryParse(command, out index))
                     {
                         _outMess.PrintMessage(_worker.RemoveFromConfig(index) ? "Протокол удалён" : "Ошибка удаления");
                     }
@@ -152,17 +108,99 @@ namespace Pinger.UI
                         _outMess.PrintMessage("Вы ввели неверный параметр, пожалуйста пробуйте ввести заново");
 
                     OptionsToWork(_inputs.ValuesFromUi());
-                    return null;
+                    break;
                 }
                 case KeyOptions.Stop:
                     _pinger.StopWork();
                     _outMess.PrintMessage("Введите процесс опроса остановлен, введите команду:");
                     OptionsToWork((_inputs.ValuesFromUi()));
-                    return null;
+                    break;
                 default:
                     _outMess.PrintMessage(
-                        "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки" , "\n", true);
-                    return OptionsToWork(_inputs.ValuesFromUi());
+                        "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки", "\n", true);
+                    OptionsToWork(_inputs.ValuesFromUi());
+                    break;
+            }
+        }
+
+        public void StopProcess()
+        {
+            _cki = Console.ReadKey(false);
+            if (_cki != null)
+            {
+                Task task = Task.Run(() => _pinger.StopWork());
+                Task.WhenAll(task);
+                Thread.Sleep(1000);
+                _outMess.PrintMessage("Процесс остановлен введите команду...", "\n", false);
+            }
+        }
+
+        public void CommandShow()
+        {
+            if (_worker.GetFromConfig().Count > 0)
+            {
+                foreach (KeyValuePair<int, IPinger> value in _worker.GetFromConfig())
+                {
+                    _outMess.PrintMessage(
+                        $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
+                }
+                return;
+            }
+            _outMess.PrintMessage("В конфигурационном файле отстувует список хостов, добавьте хост");
+        }
+
+        private void PingMessage()
+        {
+            _outMess.PrintMessage(
+                        "Начинается переодический опрос хостов из файла конфигураций, результат опроса будет записан в логфайл");
+            _outMess.PrintMessage("Для отмены нажмите Any Key или для выхода Ctrl+C", "\n", true);
+            Thread.Sleep(2500);
+        }
+
+        public Boolean CommandPing(string command)
+        {
+            if (string.IsNullOrEmpty(command))
+                return false;
+            int tmp;
+            if ((_inputs.VerifyString(ref command, "[", "]")) && Int32.TryParse(command, out tmp))
+            {
+                PingMessage();
+                if (_worker.GetFromConfig().ContainsKey(tmp))
+                    _worker.GetFromConfig()[tmp].StartWork(_log);
+                else return false;
+                _cki = Console.ReadKey(false);
+                if(_cki!=null)
+                    _worker.GetFromConfig().Values.ElementAt(tmp).StopWork();
+                return true;
+            }
+            if (command.ToLowerInvariant() == "all")
+            {
+                PingMessage();
+                ThreadPool.QueueUserWorkItem(StartPingProcess);
+                Thread.Sleep(3000);
+                StopProcess();
+                return true;
+            }
+            _outMess.PrintMessage("Неверная команда для запуска пингования");
+            return false;
+        }
+
+        public void CommandAdd(string command)
+        {
+            try
+            {
+                if (_inputs.VerifyString(ref command, "[", "]"))
+                    _outMess.PrintMessage(
+                        _worker.SaveInConfig(command.Split(' '))
+                            ? "Введённые данные добавлены успешно! Введите следующую команду:"
+                            : "Ошибка при вводе данных! Введите следующую команду:", "\n", false);
+                else
+                    _outMess.PrintMessage("Ошибка при вводе данных! Введите следующую команду:", "\n",
+                        false);
+            }
+            catch (NotImplementedException e)
+            {
+                _outMess.PrintMessage(e.Message);
             }
         }
 
@@ -183,9 +221,11 @@ namespace Pinger.UI
 
         public void SetUiSettings()
         {
-            Console.SetWindowSize((int) (Console.LargestWindowWidth * 0.28),
+            if (Console.LargestWindowHeight == 0 && Console.LargestWindowWidth == 0)
+                return;
+            Console.SetWindowSize((int) (Console.LargestWindowWidth * 0.33),
                 (int) (Console.LargestWindowHeight * 0.28));
-            Console.SetBufferSize((int) (Console.LargestWindowWidth * 0.28), Console.BufferHeight);
+            Console.SetBufferSize((int) (Console.LargestWindowWidth * 0.33), Console.BufferHeight);
         }
 
         public void RunGui()
@@ -193,8 +233,9 @@ namespace Pinger.UI
             string slash = "";
             for (int x = 0; x < Console.WindowWidth; x++)
                 slash += "-";
-            slash = slash + "\n" + OptionsToWork("pinger start".Split(' ')) + "\n\n" + slash;
-            _outMess.PrintMessage(slash);
+            _outMess.PrintMessage(slash, "\n", true);
+             OptionsToWork("pinger start".Split(' '));
+            _outMess.PrintMessage(slash, "\n", true);
             OptionsToWork(_inputs.ValuesFromUi());
         }
     }
@@ -212,13 +253,14 @@ namespace Pinger.UI
         public static string[] GetHelpOptions()
         {
             return new[] {
-                Add + " - позволяет добавить имя хоста в конфигурационный файл \nПример для ICMP протокола " + Add + " [wwww.yandex.ru 5 ICMP] \n" +
-                "Пример для Http/Https протокола: [www.yandex.ru 16 http 200]\n - последняя цифра это статус-код \n" +
-                "Пример для tcp/ip протокола: [10.200.224.94:50 15 tcp/ip]\n - через двоеточие указывается порт",
-                Quit + " - Завершает работу приложения",
-                Remove + " [№]  - удаляет хост с указанным номером",
-                Show  + " - Отображает сохраненные хосты из файла конфигураций",
-                Ping + " - Запускает опрос указанных хостов в конфиг-файле"
+                Ping + " - Запускает опрос указанных хостов в конфиг-файле \n",
+                Ping + " [№] - Запускает опрос указанного хоста из списка файла конфигурации\n",
+                Add + " - позволяет добавить имя хоста в конфигурационный файл \n  Пример для ICMP протокола: " + Add + " [wwww.yandex.ru 5 ICMP] \n" +
+                "  Пример для Http/Https протокола:\n  "+Add +" [www.yandex.ru 16 http 200]- последняя цифра это статус-код \n" +
+                "  Пример для tcp/ip протокола:\n"+Add+" [10.200.224.94:50 15 tcp/ip]- через двоеточие указывается порт \n",
+                Show  + " - Отображает сохраненные хосты из файла конфигураций\n",
+                Remove + " [№]  - удаляет хост с указанным номером\n",
+                Quit + " - Завершает работу приложения\n"
             };
         }
         public const String HelloMessage = "\t\t Добро пожаловать в \"Pinger\"! \n \t введите команду или вызовите справку [pinger -help]";

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Net;
 using Pinger.ConfigurationModule;
-using Pinger.Modules;
-using Pinger.PingerModule;
 
 namespace Pinger.Protocols
 {
-    internal sealed class ProtocolCreator
+    public sealed class ProtocolCreator
     {
-        public static PingerModule.Pinger CreateProtocol(CustomConfigAttribute data)
+        public static PingerModule.IPinger CreateProtocol(CustomConfigAttribute data)
         {
             PingerModule.Pinger pProtocol;
             switch (data.Protocol?.ToString().ToLowerInvariant())
@@ -16,7 +14,7 @@ namespace Pinger.Protocols
                 case "http":
                 {
                     HttpStatusCode code;
-                    if (HttpStatusCode.TryParse(data.HttpCode?.ToString(), out code))
+                    if (Enum.TryParse(data.HttpCode?.ToString(), out code))
                     {
                         pProtocol = new PingerModule.Pinger() {Protocol = new HttpProtocol(data.Host.ToString(), code)};
                         pProtocol.SetInterval(data.Interval?.ToString());
@@ -31,7 +29,7 @@ namespace Pinger.Protocols
                 }
                 case "icmp":
                 {
-                    pProtocol = new PingerModule.Pinger() {Protocol = new IcmpProtocol() {Host = data.Host.ToString()}};
+                    pProtocol = new PingerModule.Pinger() {Protocol = new IcmpProtocol(data.Host.ToString())};
                     pProtocol.SetInterval(data.Interval.ToString());
                     return pProtocol;
 

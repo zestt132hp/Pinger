@@ -1,9 +1,8 @@
-﻿using System;
-using Pinger.Logger;
+﻿using Pinger.Logger;
 
 namespace Pinger.Protocols
 {
-    interface IProtocol
+    public interface IProtocol
     {
         string Host { get; set; }
         string ProtocolName { get; }

@@ -8,21 +8,21 @@ using Pinger.Protocols;
 
 namespace Pinger.ConfigurationModule
 {
-    internal sealed class ConfigurationWorker: IConfigWorker
+    public sealed class ConfigurationWorker: IConfigWorker
     {
         #region Private Members & Methods & Property
 
         private static XElement _rootNode;
         private event EventHandler Refresh;
         private static String ConfigFileName { get; set; }
-        private static readonly Dictionary<int, PingerModule.Pinger> ListProtocols = new Dictionary<int, PingerModule.Pinger>();
+        private static readonly Dictionary<int, PingerModule.IPinger> ListProtocols = new Dictionary<int, PingerModule.IPinger>();
         private static readonly String DataConfiguration = "DataConfiguration";
 
         private void ConfigurationReader_Refresh(object sender, EventArgs e)
         {
             GetProtocolsFromConfig(Configuration.RefreshRate);
         }
-        private static Dictionary<int, PingerModule.Pinger> GetProtocolsFromConfig(CustomConfigAttribute attribute)
+        private static Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig(CustomConfigAttribute attribute)
         {
             if(ListProtocols.Any())
                 ListProtocols.Clear();
@@ -50,7 +50,7 @@ namespace Pinger.ConfigurationModule
             return ListProtocols;
 
         }
-        private Dictionary<int, PingerModule.Pinger> GetProtocolsFromConfig(Enum enumValue)
+        private Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig(Enum enumValue)
         {
             Type type = enumValue.GetType();
             FieldInfo info = type.GetField(enumValue.ToString());
@@ -84,11 +84,13 @@ namespace Pinger.ConfigurationModule
 
         public ConfigurationWorker(String fileName)
         {
+            if (string.IsNullOrEmpty(fileName))
+                throw new ArgumentNullException("Имя файла конфигурации не может быть пустым");
+            ConfigFileName = fileName;
             string uri = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName;
             if (File.Exists(uri))
             {
                 _rootNode = XElement.Load(uri);
-                ConfigFileName = fileName;
                 Refresh += ConfigurationReader_Refresh;
             }
             else
@@ -109,7 +111,7 @@ namespace Pinger.ConfigurationModule
             }
         }
 
-        public Dictionary<int, PingerModule.Pinger> GetFromConfig()
+        public Dictionary<int, PingerModule.IPinger> GetFromConfig()
         {
             if (!ListProtocols.Any())
             {
@@ -133,7 +135,6 @@ namespace Pinger.ConfigurationModule
             }
             if (ListProtocols.ContainsKey(index))
             {
-                Pinger.PingerModule.Pinger pinMod = ListProtocols[index];
                 _rootNode.Elements(DataConfiguration)
                     .Select(x => x).ToArray()[index].Remove();
                 _rootNode.Save(ConfigFileName);
@@ -160,11 +161,11 @@ namespace Pinger.ConfigurationModule
 
 
 
-    internal interface IConfigWorker
+    public interface IConfigWorker
     {
         Boolean SaveInConfig(params string[] values);
 
-        Dictionary<int, PingerModule.Pinger> GetFromConfig();
+        Dictionary<int, PingerModule.IPinger> GetFromConfig();
         Boolean RemoveFromConfig(Int32 index);
         void CreateConfig();
     }

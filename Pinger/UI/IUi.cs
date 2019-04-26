@@ -1,6 +1,6 @@
-﻿namespace Pinger.GUI
+﻿namespace Pinger.UI
 {
-    interface IUi
+    public interface IUi
     {
         void SetUiSettings();
         void RunGui();

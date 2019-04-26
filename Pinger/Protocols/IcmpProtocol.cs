@@ -1,23 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.ServiceModel.Channels;
 using System.Text;
-using System.Threading.Tasks;
 using Pinger.Logger;
-using Pinger.PingerModule;
-using Pinger.Protocols;
 
-namespace Pinger.Modules
+namespace Pinger.Protocols
 {
-    internal class IcmpProtocol:IProtocol
+    public class IcmpProtocol:IProtocol
     {
         public string Host { get; set; }
-        private static String _message = "data";
+        private static String _message = "DataTest";
         public string ProtocolName => "Icmp";
         public string Message { get; set; } = _message;
+        public IcmpProtocol(string host)
+        {
+            if (string.IsNullOrEmpty(host))
+                Host = host;
+            else
+                Host = "localhost";
+        }
         public RequestStatus SendRequest(ILogger logger)
         {
             const int timeout = 120;
@@ -50,7 +52,7 @@ namespace Pinger.Modules
             }
             catch (Exception ex)
             {
-                logger.Write(new Exception("Исключение при отправке запроса. \nТекст ошибки: " + ex));
+                logger.Write(ex);
                 Message = $"Ошибка при получении данных";
                 return new RequestStatus(false);
             }

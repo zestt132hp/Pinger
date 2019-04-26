@@ -1,28 +1,25 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using Pinger.Logger;
-using Pinger.PingerModule;
-using Pinger.Protocols;
 
-namespace Pinger.Modules
+namespace Pinger.Protocols
 {
-    sealed class TcpProtocol: IProtocol
+    public class TcpProtocol: IProtocol
     {
         private static readonly string regExpressionForChekIp = @"^(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[0-9]{2}|[0-9])){3}";
         private static readonly string regExForPort = "|([:][0-9]{2,5})";
         private Regex reg = new Regex(regExpressionForChekIp);
-        private Int32 port;
-        private static String message = "data";
+        private Int32 _port;
+        private static String message = "DataTest";
         private String _host;
 
         public int Port
         {
-            get { return port; }
+            get { return _port; }
             set {
-                port = value < 80 ? 80 : value;
+                _port = value < 80 ? 80 : value;
             }
         }
 
@@ -44,7 +41,7 @@ namespace Pinger.Modules
             {
                 string[] array = hostName.Split(':');
                 _host = array[0];
-                Int32.TryParse(array[1], out port);
+                Int32.TryParse(array[1], out _port);
             }
             else
             {
@@ -67,6 +64,7 @@ namespace Pinger.Modules
                     bytes = new byte[8];
                     var readBytes = networkStream.Read(bytes, 0, bytes.Length);
                     var responseData = Encoding.ASCII.GetString(bytes, 0, networkStream.Read(bytes, 0, readBytes));
+                    Message = responseData;
                     if (readBytes > 0)
                     {
                         return new RequestStatus(isSuccess:true);
@@ -75,7 +73,8 @@ namespace Pinger.Modules
             }
             catch (Exception e)
             {
-                logger.Write(e);
+                logger.Write(new Exception($"{Host}:{Port} || {e.Message}"));
+                Message = "Fail";
             }
             return new RequestStatus(isSuccess: false) ;
         }
