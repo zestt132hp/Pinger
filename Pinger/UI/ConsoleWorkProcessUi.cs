@@ -43,7 +43,6 @@ namespace Pinger.UI
             }
             else
                 option = keyPress.Aggregate((x, y) => x + " " + y);
-
             switch (option)
             {
                 case KeyOptions.Add:
@@ -65,8 +64,10 @@ namespace Pinger.UI
                     break;
                 }
                 case KeyOptions.Start:
+                {
                     _outMess.PrintMessage(KeyOptions.HelloMessage);
                     break;
+                }
                 case KeyOptions.Ping:
                 {
                     Console.CancelKeyPress += KeyPress;
@@ -89,7 +90,6 @@ namespace Pinger.UI
                     {
                         OptionsToWork(_inputs.ValuesFromUi());
                     }
-
                     break;
                 }
                 case KeyOptions.Help:
@@ -167,7 +167,6 @@ namespace Pinger.UI
                 PingMessage();
                 if (_worker.GetFromConfig().ContainsKey(tmp))
                     InjectKernel.Get<IPingerProcessor>().Ping(_log);
-                    //_worker.GetFromConfig()[tmp].StartWork(_log);
                 else return false;
                 _cki = Console.ReadKey(false);
                 if(_cki!=null)
