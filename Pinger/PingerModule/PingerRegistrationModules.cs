@@ -13,7 +13,7 @@ namespace Pinger.PingerModule
         {
             Bind<IConfigWorker>().To<ConfigurationWorker>().WithConstructorArgument("PingerConfiguration.config");
             Bind<IConfigurationNlog>().To<NlogConfiguration>();
-            Bind<IPingerProcessor>().To<PingerProcessor>();
+            Bind<IPingerProcessor>().To<PingerProcessor>().WithConstructorArgument("confWorker");
             Bind<IUi>().To<ConsoleWorkProcessUi>();
             Bind<IConsoleOutputUi>().To<ConsoleOutputOutputMessage>();
             Bind<IInputsUi>().To<ConsoleInputData>();

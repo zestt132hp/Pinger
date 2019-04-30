@@ -12,7 +12,6 @@ namespace PingerTest
         public void UiTestMethod()
         {
             var mock = new Mock<IUi>();
-            mock.Setup(a=>a.SetUiSettings()).Verifiable();
             mock.Setup(a=>a.RunGui()).Verifiable();
         }
 
@@ -36,11 +35,6 @@ namespace PingerTest
             Assert.AreEqual(ui.CommandPing(null), false);
             Assert.AreNotEqual(ui.CommandPing(KeyOptions.Ping + " [3]"), true);
             Assert.AreEqual(ui.CommandPing("[3]"), false);
-        }
-        [TestMethod]
-        public void CommandAddMethodTest()
-        {
-            
         }
     }
 }

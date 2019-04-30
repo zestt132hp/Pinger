@@ -10,7 +10,7 @@ namespace Pinger.Protocols
     public class IcmpProtocol:IProtocol
     {
         public string Host { get; set; }
-        private static String _message = "DataTest";
+        private  static readonly String _message = "DataTest";
         public string ProtocolName => "Icmp";
         public string Message { get; set; } = _message;
         public IcmpProtocol(string host)

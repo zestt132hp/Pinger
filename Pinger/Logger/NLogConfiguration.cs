@@ -30,7 +30,3 @@ namespace Pinger.Logger
         }
     }
 }
-/*FileTarget errorFiles = new FileTarget();
-            fileTarget.FileName = "${basedir}/logs/" + $"{logName}_error.txt";
-            fileTarget.Layout = "${date:format=HH\\:mm\\:ss}| ${message}";
-            config.AddTarget("file", errorFiles);*/

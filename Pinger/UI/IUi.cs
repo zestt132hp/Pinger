@@ -2,7 +2,6 @@
 {
     public interface IUi
     {
-        void SetUiSettings();
         void RunGui();
     }
 }

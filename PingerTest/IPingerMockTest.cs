@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Ninject;
+using Pinger.Logger;
 using Pinger.PingerModule;
 using Pinger.Protocols;
 using Pinger.UI;
@@ -18,17 +19,17 @@ namespace PingerTest
             //Arrange
             var mock = new Mock<IPinger>();
             var ui = new ConsoleWorkProcessUi();
-            var ilog = ui.InjectKernel.Get<Pinger.Logger.ILogger>();
+            ui.InjectKernel.Get<ILogger>();
 
             //Act
-            mock.Setup(x => x.StartWork(ilog)).Verifiable();
+            mock.Setup(x => x.StartWork()).Verifiable();
             mock.Setup(x=>x.StopWork()).Verifiable();
-            mock.Setup(x => x.StartWork(null)).Throws<NullReferenceException>();
+            mock.Setup(x => x.StartWork()).Throws<NullReferenceException>();
 
             //Assert
             IPinger ping = mock.Object;
-            ping.StartWork(null);
-            mock.VerifySet(x => x.StartWork(ilog));
+            ping.StartWork();
+            mock.VerifySet(x => x.StartWork());
             mock.VerifySet(x=>x.StopWork());
         }
 
@@ -44,7 +45,6 @@ namespace PingerTest
             //Act
             mock.Setup(x => x.Protocol);
             mock.Setup(x => x.Interval);
-            mock.SetupProperty(x => x.Interval, 0);
             mock.Setup(x => x.Protocol).Returns(_protocol);
 
             //Assert
@@ -54,6 +54,28 @@ namespace PingerTest
             Assert.AreNotSame(pinger.Protocol, protocol);
             Assert.IsFalse(pinger.Protocol==protocol);
             Assert.IsTrue(pinger.Interval>-1);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void PingerProcessorTest()
+        {
+            //Arrange
+            var mock = new Mock<IPingerProcessor>();
+            var logger = new Mock<ILogger>();
+            mock.Setup(x => x.Ping(logger.Object)).Verifiable();
+            mock.Setup(x => x.Ping(It.Is<Int32>(z => z < 0), logger.Object)).Throws(new ArgumentException());
+            mock.Setup(x => x.StopPing()).Verifiable();
+
+            //Act
+            IPingerProcessor processor = mock.Object;
+
+            //Assert
+            processor.Ping(logger.Object);
+            processor.Ping(-1, logger.Object);
+            processor.Ping(1, logger.Object);
+            processor.StopPing();
+            Mock.VerifyAll(mock);
         }
     }
 }

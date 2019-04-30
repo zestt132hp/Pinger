@@ -4,7 +4,8 @@ namespace Pinger.PingerModule
 {
     public interface IPingerProcessor
     {
-        void StartWork(ILogger logger);
-        void StopWork();
+        void Ping(int index, ILogger logger);
+        void Ping(ILogger logger);
+        void StopPing();
     }
 }

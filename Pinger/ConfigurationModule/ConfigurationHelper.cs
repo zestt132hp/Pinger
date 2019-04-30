@@ -14,19 +14,19 @@ namespace Pinger.ConfigurationModule
         RefreshRate
     }
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-    public sealed class CustomConfigAttribute: Attribute
+    public class CustomConfigAttribute: Attribute
     {
-        public object Host { get; set; }
-        public object Interval { get; set; }
-        public object Protocol { get; set; }
-        public object HttpCode { get; set; }
-        public object Port { get; set; }
+        public String Host { get; set; }
+        public String Interval { get; set; }
+        public String Protocol { get; set; }
+        public String HttpCode { get; set; }
+        public String Port { get; set; }
 
-        public static CustomConfigAttribute CreateConfigAttribute(params string[] values)
+        public static CustomConfigAttribute CreateConfigAttribute(params String[] values)
         {
             CustomConfigAttribute conf = new CustomConfigAttribute();
             var properties = typeof(CustomConfigAttribute).GetProperties();
-            for (int x = 0; x < values.Length; x++)
+            for (Int32 x = 0; x < values.Length; x++)
             {
                 switch (properties[x].Name)
                 {
@@ -51,10 +51,11 @@ namespace Pinger.ConfigurationModule
         {
             CustomConfigAttribute confAttr = new CustomConfigAttribute();
             var properties = confAttr.GetType().GetProperties();
-            int index = 0;
-            foreach (var val in values)
+            Int32 index = 0;
+            foreach (string val in values)
             {
-                properties.SetValue(val, index);
+                var prop = confAttr.GetType().GetProperty(properties[index].Name);
+                prop.SetValue(confAttr, val);
                 index++;
             }
             return confAttr;
@@ -69,7 +70,6 @@ namespace Pinger.ConfigurationModule
                 if (cusAttrobutes[x].MemberName == nameProperty)
                     return cusAttrobutes[x].TypedValue.Value.ToString();
             }
-
             return null;
         }
     }

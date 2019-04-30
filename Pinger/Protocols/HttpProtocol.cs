@@ -9,7 +9,7 @@ namespace Pinger.Protocols
     {
         private readonly Regex _regex = new Regex("^(http|https)://");
         private string _host;
-        private HttpStatusCode _code = HttpStatusCode.OK;
+        private readonly HttpStatusCode _code = HttpStatusCode.OK;
 
         public Int16 StatusCode
         {

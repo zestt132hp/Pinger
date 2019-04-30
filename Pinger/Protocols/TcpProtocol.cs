@@ -12,7 +12,7 @@ namespace Pinger.Protocols
         private static readonly string regExForPort = "|([:][0-9]{2,5})";
         private Regex reg = new Regex(regExpressionForChekIp);
         private Int32 _port;
-        private static String message = "DataTest";
+        private static readonly String message = "DataTest";
         private String _host;
 
         public int Port

@@ -11,14 +11,19 @@ namespace Pinger.PingerModule
         private IProtocol _protocol;
         private Int32 _interval = 5;
         private ILogger _logger;
-        public IProtocol Protocol {
-            get { return _protocol; }
-            set { _protocol = value; }
+        public IProtocol Protocol => _protocol;
+
+        public Pinger(IProtocol protocol, ILogger logger)
+        {
+            if(protocol == null || logger == null)
+                throw new NullReferenceException(nameof(Pinger));
+            _protocol = protocol;
+            _logger = logger;
         }
 
         public Int32 Interval
         {
-            get { return _interval; }
+            get => _interval;
             set
             {
                 if (value > 0)
@@ -31,25 +36,28 @@ namespace Pinger.PingerModule
             StopTimer();
         }
 
-        public void SetInterval(string value)
+        public void SetInterval(String value)
         {
             Int32 tmp;
             if (Int32.TryParse(value, out tmp))
                 _interval = tmp;
         }
 
-        public void StartTimer()
+        private void StartTimer()
         {
-            _timer = new Timer(Interval);
-            _timer.Elapsed += OnTimedEvent;
+            if (_timer == null)
+            {
+                _timer = new Timer(Interval);
+                _timer.Elapsed += OnTimedEvent;
+            }
             _timer.AutoReset = true;
             _timer.Enabled = true;
             _timer.Start();
         }
 
-        private void OnTimedEvent(object sender, ElapsedEventArgs e)
+        private void OnTimedEvent(Object sender, ElapsedEventArgs e)
         {
-            string message = $"Host: {Protocol.Host}\n Result: ";
+            String message = $"Host: {Protocol.Host}\n Result: ";
             message += Protocol.SendRequest(_logger).IsSucces ? "OK" : "FAILED";
             message += "\n Message From Process: " + Protocol.Message;
             _logger.Write(message);
@@ -63,13 +71,8 @@ namespace Pinger.PingerModule
             _timer.Dispose();
         }
 
-        public void StartWork(ILogger logger)
+        public void StartWork()
         {
-            if (Protocol == null)
-                return;
-            if (logger == null)
-                return;
-            _logger = logger;
             StartTimer();
         }
     }

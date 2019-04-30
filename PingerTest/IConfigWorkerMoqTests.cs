@@ -6,6 +6,7 @@ using NLog.Config;
 using Pinger.ConfigurationModule;
 using Pinger.Logger;
 using Pinger.PingerModule;
+using Pinger.Protocols;
 
 namespace PingerTest
 {
@@ -13,17 +14,21 @@ namespace PingerTest
     public class ConfigWorkerMoqTests
     {
         private Dictionary<int, IPinger> _listHost;
-        private Dictionary<int, IPinger> list = null;
+        private readonly Dictionary<int, IPinger> _list = null;
 
         [TestMethod]
         public void MoqConfigWorkerTest()
         {
             //arrange
             var workconf = new Mock<IConfigWorker>();
-            _listHost = new Dictionary<int, IPinger>(10);
-            _listHost.Add(1, new Pinger.PingerModule.Pinger());
-            _listHost.Add(2, new Pinger.PingerModule.Pinger());
-            _listHost.Add(3, new Pinger.PingerModule.Pinger());
+            var protocol = new Mock<IProtocol>();
+            var logger = new Mock<ILogger>();
+            _listHost = new Dictionary<int, IPinger>(10)
+            {
+                {1, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)},
+                {2, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)},
+                {3, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)}
+            };
 
             //act
             workconf.Setup(x => x.RemoveFromConfig(1));
@@ -37,7 +42,7 @@ namespace PingerTest
 
             workconf.Setup(
                 x => x.RemoveFromConfig(It.Is<Int32>(v => _listHost.Count == 0))).Returns(false);
-            workconf.Setup(x => x.RemoveFromConfig(It.Is<Int32>(v => list==null))).Returns(false);
+            workconf.Setup(x => x.RemoveFromConfig(It.Is<Int32>(v => _list==null))).Returns(false);
             workconf.Setup(x => x.RemoveFromConfig(It.Is<Int32>(v => _listHost.Count > v)))
                 .Returns(true);
             workconf.Setup(x => x.RemoveFromConfig(It.Is<Int32>(i => i < 0))).Returns(false);

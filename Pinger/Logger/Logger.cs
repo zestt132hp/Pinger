@@ -11,9 +11,9 @@ namespace Pinger.Logger
         private readonly NLog.Logger _logger;
         private IConsoleOutputUi _output;
 
-        public Logger(string logName)
+        public Logger(String logName)
         {
-            var name = string.IsNullOrEmpty(logName) ? DateTime.Now.ToShortDateString() : logName;
+            var name = String.IsNullOrEmpty(logName) ? DateTime.Now.ToShortDateString() : logName;
             _logger = LogManager.GetCurrentClassLogger();
             var configuration = PingerRegistrationModules.GetKernel().Get<IConfigurationNlog>();
             LogManager.Configuration = configuration.GetLogConfiguration(name);
@@ -24,13 +24,13 @@ namespace Pinger.Logger
         {
             try
             {
-                Exception e = message as Exception;
+                var e = message as Exception;
                 if (e != null)
                 {
                     WriteException(e);
                     return;
                 }
-                string s = message as String;
+                var s = message as String;
                 if (s != null)
                 {
                     WriteMessage(s);
@@ -44,20 +44,13 @@ namespace Pinger.Logger
 
         private void WriteMessage(String message)
         {
-
-            lock (_logger)
-            {
-                _logger.Info(message);
-                _logger.Debug(message);
-            }
+            _logger.Info(message);
+            _logger.Debug(message);
         }
 
         private void WriteException(Exception message)
         {
-            lock (_logger)
-            {
-                _logger.Error(message);
-            }
+            _logger.Error(message);
         }
     }
 }

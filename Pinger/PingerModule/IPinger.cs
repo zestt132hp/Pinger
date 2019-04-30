@@ -1,10 +1,12 @@
-﻿using Pinger.Protocols;
+﻿using System;
+using Pinger.Protocols;
 
 namespace Pinger.PingerModule
 {
-    public interface IPinger:IPingerProcessor
+    public interface IPinger:IPingerProperty
     {
-        IProtocol Protocol { get; }
-        int Interval { get; set; }
+        void StartWork();
+        void StopWork();
+        void SetInterval(String interval);
     }
-}
+  }

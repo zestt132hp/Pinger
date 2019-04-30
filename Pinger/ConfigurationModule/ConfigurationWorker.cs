@@ -22,7 +22,7 @@ namespace Pinger.ConfigurationModule
         {
             GetProtocolsFromConfig(Configuration.RefreshRate);
         }
-        private static Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig(CustomConfigAttribute attribute)
+        private static Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig()
         {
             if(ListProtocols.Any())
                 ListProtocols.Clear();
@@ -56,7 +56,7 @@ namespace Pinger.ConfigurationModule
             FieldInfo info = type.GetField(enumValue.ToString());
             var customAttribute = Attribute.GetCustomAttribute(info,
                 typeof(CustomConfigAttribute)) as CustomConfigAttribute;
-            return GetProtocolsFromConfig(customAttribute);
+            return GetProtocolsFromConfig();
         }
         private void SaveInConfig(CustomConfigAttribute attribute)
         {
@@ -161,14 +161,7 @@ namespace Pinger.ConfigurationModule
 
 
 
-    public interface IConfigWorker
-    {
-        Boolean SaveInConfig(params string[] values);
-
-        Dictionary<int, PingerModule.IPinger> GetFromConfig();
-        Boolean RemoveFromConfig(Int32 index);
-        void CreateConfig();
-    }
+   
 }
 
 

@@ -1,44 +1,47 @@
 ﻿using System;
 using System.Net;
+using Ninject;
 using Pinger.ConfigurationModule;
+using Pinger.Logger;
+using Pinger.PingerModule;
 
 namespace Pinger.Protocols
 {
     public sealed class ProtocolCreator
     {
-        public static PingerModule.IPinger CreateProtocol(CustomConfigAttribute data)
+        public static IPinger CreateProtocol(CustomConfigAttribute data)
         {
-            PingerModule.Pinger pProtocol;
-            switch (data.Protocol?.ToString().ToLowerInvariant())
+            IPinger pProtocol;
+            switch (data.Protocol.ToLowerInvariant())
             {
                 case "http":
                 {
                     HttpStatusCode code;
-                    if (Enum.TryParse(data.HttpCode?.ToString(), out code))
+                    if (Enum.TryParse(data.HttpCode, out code))
                     {
-                        pProtocol = new PingerModule.Pinger() {Protocol = new HttpProtocol(data.Host.ToString(), code)};
-                        pProtocol.SetInterval(data.Interval?.ToString());
+                        pProtocol = new PingerModule.Pinger(new HttpProtocol(data.Host, code), PingerRegistrationModules.GetKernel().Get<ILogger>());
+                        pProtocol.SetInterval(data.Interval);
                         return pProtocol;
                     }
                     else
                     {
-                        pProtocol = new PingerModule.Pinger() {Protocol = new HttpProtocol(data.Host.ToString())};
-                        pProtocol.SetInterval(data.Interval?.ToString());
+                        pProtocol = new PingerModule.Pinger(new HttpProtocol(data.Host), PingerRegistrationModules.GetKernel().Get<ILogger>());
+                        pProtocol.SetInterval(data.Interval);
                         return pProtocol;
                     }
                 }
                 case "icmp":
                 {
-                    pProtocol = new PingerModule.Pinger() {Protocol = new IcmpProtocol(data.Host.ToString())};
-                    pProtocol.SetInterval(data.Interval.ToString());
+                    pProtocol = new PingerModule.Pinger(new IcmpProtocol(data.Host), PingerRegistrationModules.GetKernel().Get<ILogger>());
+                    pProtocol.SetInterval(data.Interval);
                     return pProtocol;
 
                 }
                 case "tcp/ip":
                 case "tcp":
                 case "ip":
-                    pProtocol = new PingerModule.Pinger() {Protocol = new TcpProtocol(data.Host.ToString())};
-                    pProtocol.SetInterval(data.Interval.ToString());
+                    pProtocol = new PingerModule.Pinger(new TcpProtocol(data.Host), PingerRegistrationModules.GetKernel().Get<ILogger>());
+                    pProtocol.SetInterval(data.Interval);
                     return pProtocol;
                 default:
                     throw new NotImplementedException(

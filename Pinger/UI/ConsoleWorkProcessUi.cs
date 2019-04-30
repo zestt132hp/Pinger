@@ -33,9 +33,9 @@ namespace Pinger.UI
         public void OptionsToWork(String[] keyPress)
         {
             if (keyPress == null)
-                throw new ArgumentNullException("Введено пустое значение команды");
-            string command = "";
-            string option;
+                throw new ArgumentNullException("keyPress");
+            String command = "";
+            String option;
             if (keyPress.Length > 2)
             {
                 option = keyPress[0] + " " + keyPress[1];
@@ -57,19 +57,21 @@ namespace Pinger.UI
                     break;
                 }
                 case KeyOptions.Quit:
+                {
                     _outMess.PrintMessage("Приложение завершает свою работу");
                     Console.CancelKeyPress -= KeyPress;
                     Thread.Sleep(1000);
                     Environment.Exit(0);
                     break;
+                }
                 case KeyOptions.Start:
                     _outMess.PrintMessage(KeyOptions.HelloMessage);
                     break;
                 case KeyOptions.Ping:
                 {
+                    Console.CancelKeyPress += KeyPress;
                     if (!CommandPing(command))
                         _outMess.PrintMessage("Неверная команда для старта пингования");
-                    Console.CancelKeyPress += KeyPress;
                     OptionsToWork(_inputs.ValuesFromUi());
                     break;
                 }
@@ -87,19 +89,20 @@ namespace Pinger.UI
                     {
                         OptionsToWork(_inputs.ValuesFromUi());
                     }
+
                     break;
                 }
                 case KeyOptions.Help:
                 {
                     _outMess.PrintMessage(KeyOptions.GetHelpOptions().Aggregate((a, b) => $"{a}\n{b}"), "\n", false);
                     OptionsToWork(_inputs.ValuesFromUi());
-                        break;
+                    break;
                 }
                 case KeyOptions.Remove:
                 {
                     if (!_inputs.VerifyString(ref command, "[", "]"))
                         _outMess.PrintMessage("Введенные данные не верны");
-                    int index;
+                    Int32 index;
                     if (Int32.TryParse(command, out index))
                     {
                         _outMess.PrintMessage(_worker.RemoveFromConfig(index) ? "Протокол удалён" : "Ошибка удаления");
@@ -110,36 +113,33 @@ namespace Pinger.UI
                     OptionsToWork(_inputs.ValuesFromUi());
                     break;
                 }
-                case KeyOptions.Stop:
-                    _pinger.StopWork();
-                    _outMess.PrintMessage("Введите процесс опроса остановлен, введите команду:");
-                    OptionsToWork((_inputs.ValuesFromUi()));
-                    break;
                 default:
+                {
                     _outMess.PrintMessage(
                         "Неизвестная опция! Повторите ввод или наберите [pinger -help] для вызова справки", "\n", true);
                     OptionsToWork(_inputs.ValuesFromUi());
                     break;
+                }
             }
         }
 
-        public void StopProcess()
+        private void StopProcess()
         {
             _cki = Console.ReadKey(false);
             if (_cki != null)
             {
-                Task task = Task.Run(() => _pinger.StopWork());
+                Task task = Task.Run(() => _pinger.StopPing());
                 Task.WhenAll(task);
                 Thread.Sleep(1000);
                 _outMess.PrintMessage("Процесс остановлен введите команду...", "\n", false);
             }
         }
 
-        public void CommandShow()
+        private void CommandShow()
         {
             if (_worker.GetFromConfig().Count > 0)
             {
-                foreach (KeyValuePair<int, IPinger> value in _worker.GetFromConfig())
+                foreach (KeyValuePair<Int32, IPinger> value in _worker.GetFromConfig())
                 {
                     _outMess.PrintMessage(
                         $"[{value.Key}] Host: {value.Value.Protocol.Host} Interval: {value.Value.Interval} Protocol: {value.Value.Protocol.ProtocolName}");
@@ -157,16 +157,17 @@ namespace Pinger.UI
             Thread.Sleep(2500);
         }
 
-        public Boolean CommandPing(string command)
+        public Boolean CommandPing(String command)
         {
-            if (string.IsNullOrEmpty(command))
+            if (String.IsNullOrEmpty(command))
                 return false;
-            int tmp;
+            Int32 tmp;
             if ((_inputs.VerifyString(ref command, "[", "]")) && Int32.TryParse(command, out tmp))
             {
                 PingMessage();
                 if (_worker.GetFromConfig().ContainsKey(tmp))
-                    _worker.GetFromConfig()[tmp].StartWork(_log);
+                    InjectKernel.Get<IPingerProcessor>().Ping(_log);
+                    //_worker.GetFromConfig()[tmp].StartWork(_log);
                 else return false;
                 _cki = Console.ReadKey(false);
                 if(_cki!=null)
@@ -185,7 +186,7 @@ namespace Pinger.UI
             return false;
         }
 
-        public void CommandAdd(string command)
+        private void CommandAdd(String command)
         {
             try
             {
@@ -204,34 +205,34 @@ namespace Pinger.UI
             }
         }
 
-        private void KeyPress(object sender, ConsoleCancelEventArgs e)
+        private void KeyPress(Object sender, ConsoleCancelEventArgs e)
         {
             _outMess.PrintMessage("Остановка рабчего процесса");
-            _pinger.StopWork();
+            _pinger.StopPing();
             e.Cancel = true;
             _outMess.PrintMessage("Все процессы остановлены программа будет завершена через 5 сек.");
             Thread.Sleep(500);
             Environment.Exit(0);
         }
 
-        private void StartPingProcess(object state)
+        private void StartPingProcess(Object state)
         {
-            _pinger.StartWork(_log);
+            _pinger.Ping(_log);
         }
 
-        public void SetUiSettings()
+        private void SetUiSettings()
         {
             if (Console.LargestWindowHeight == 0 && Console.LargestWindowWidth == 0)
                 return;
-            Console.SetWindowSize((int) (Console.LargestWindowWidth * 0.33),
-                (int) (Console.LargestWindowHeight * 0.28));
-            Console.SetBufferSize((int) (Console.LargestWindowWidth * 0.33), Console.BufferHeight);
+            Console.SetWindowSize((Int32) (Console.LargestWindowWidth * 0.35),
+                (Int32) (Console.LargestWindowHeight * 0.5));
+            Console.SetBufferSize((Int32) (Console.LargestWindowWidth * 0.35), Console.BufferHeight);
         }
 
         public void RunGui()
         {
-            string slash = "";
-            for (int x = 0; x < Console.WindowWidth; x++)
+            String slash = "";
+            for (Int32 x = 0; x < Console.WindowWidth; x++)
                 slash += "-";
             _outMess.PrintMessage(slash, "\n", true);
              OptionsToWork("pinger start".Split(' '));
@@ -248,16 +249,15 @@ namespace Pinger.UI
         public const String Show = "pinger -show";
         public const String Start = "pinger start";
         public const String Ping = "pinger -ping";
-        public const String Stop = "s";
 
-        public static string[] GetHelpOptions()
+        public static String[] GetHelpOptions()
         {
             return new[] {
                 Ping + " - Запускает опрос указанных хостов в конфиг-файле \n",
-                Ping + " [№] - Запускает опрос указанного хоста из списка файла конфигурации\n",
+                Ping + " [№] - Запускает опрос указанного хоста \nиз списка файла конфигурации\n",
                 Add + " - позволяет добавить имя хоста в конфигурационный файл \n  Пример для ICMP протокола: " + Add + " [wwww.yandex.ru 5 ICMP] \n" +
                 "  Пример для Http/Https протокола:\n  "+Add +" [www.yandex.ru 16 http 200]- последняя цифра это статус-код \n" +
-                "  Пример для tcp/ip протокола:\n"+Add+" [10.200.224.94:50 15 tcp/ip]- через двоеточие указывается порт \n",
+                "  Пример для tcp/ip протокола:\n  "+Add+" [10.200.224.94:50 15 tcp/ip]- через двоеточие указывается порт \n",
                 Show  + " - Отображает сохраненные хосты из файла конфигураций\n",
                 Remove + " [№]  - удаляет хост с указанным номером\n",
                 Quit + " - Завершает работу приложения\n"

@@ -4,9 +4,9 @@ namespace Pinger.Protocols
 {
     public interface IProtocol
     {
-        string Host { get; set; }
+        string Host { get; }
         string ProtocolName { get; }
-        string Message { get; set; }
+        string Message { get; }
         RequestStatus SendRequest(ILogger logger);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Pinger.ConfigurationModule;
 using Pinger.Logger;
 
@@ -17,23 +18,22 @@ namespace Pinger.PingerModule
                 throw new NullReferenceException(nameof(PingerProcessor));
         }
 
-        public void StartWork(ILogger logger)
+        public void Ping(ILogger logger)
         {
-            _configWorker.GetFromConfig().Values.AsParallel().ForAll(x=>x.StartWork(logger));
+            _configWorker.GetFromConfig().Values.AsParallel().ForAll(x=>x.StartWork());
         }
 
-        public void StopWork()
+        public void StopPing()
         {
             _configWorker.GetFromConfig().Values.AsParallel().ForAll(x => x.StopWork());
+            Thread.Sleep(2000);
         }
-
-        public int Interval { get; set; }
-        public void StartWork(int index, ILogger log)
+        public void Ping(int index, ILogger log)
         {
             if(_configWorker.GetFromConfig().ContainsKey(index))
-                _configWorker.GetFromConfig()[index].StartWork(log);
+                _configWorker.GetFromConfig()[index].StartWork();
             else
-                throw new IndexOutOfRangeException(nameof(StartWork));
+                throw new IndexOutOfRangeException(nameof(Ping));
         }
     }
 }
