@@ -15,14 +15,14 @@ namespace Pinger.ConfigurationModule
         private static XElement _rootNode;
         private event EventHandler Refresh;
         private static String ConfigFileName { get; set; }
-        private static readonly Dictionary<int, PingerModule.IPinger> ListProtocols = new Dictionary<int, PingerModule.IPinger>();
+        private static readonly Dictionary<Int32, PingerModule.IPinger> ListProtocols = new Dictionary<Int32, PingerModule.IPinger>();
         private static readonly String DataConfiguration = "DataConfiguration";
 
         private void ConfigurationReader_Refresh(object sender, EventArgs e)
         {
             GetProtocolsFromConfig(Configuration.RefreshRate);
         }
-        private static Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig()
+        private static Dictionary<Int32, PingerModule.IPinger> GetProtocolsFromConfig()
         {
             if(ListProtocols.Any())
                 ListProtocols.Clear();
@@ -43,14 +43,14 @@ namespace Pinger.ConfigurationModule
                                 HttpCode = x.Element(nameof(CustomConfigAttribute.HttpCode))?.Value
                             }).ToList();
 
-            for (int x = 0; x < items.Count(); x++)
+            for (Int32 x = 0; x < items.Count(); x++)
             {
                 ListProtocols.Add(x, ProtocolCreator.CreateProtocol(items[x]));
             }
             return ListProtocols;
 
         }
-        private Dictionary<int, PingerModule.IPinger> GetProtocolsFromConfig(Enum enumValue)
+        private Dictionary<Int32, PingerModule.IPinger> GetProtocolsFromConfig(Enum enumValue)
         {
             Type type = enumValue.GetType();
             FieldInfo info = type.GetField(enumValue.ToString());
@@ -111,7 +111,7 @@ namespace Pinger.ConfigurationModule
             }
         }
 
-        public Dictionary<int, PingerModule.IPinger> GetFromConfig()
+        public Dictionary<Int32, PingerModule.IPinger> GetFromConfig()
         {
             if (!ListProtocols.Any())
             {

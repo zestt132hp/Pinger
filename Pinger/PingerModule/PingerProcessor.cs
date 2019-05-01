@@ -28,7 +28,7 @@ namespace Pinger.PingerModule
             _configWorker.GetFromConfig().Values.AsParallel().ForAll(x => x.StopWork());
             Thread.Sleep(2000);
         }
-        public void Ping(int index, ILogger log)
+        public void Ping(Int32 index, ILogger log)
         {
             if(_configWorker.GetFromConfig().ContainsKey(index))
                 _configWorker.GetFromConfig()[index].StartWork();

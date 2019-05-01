@@ -13,7 +13,7 @@ namespace PingerTest.ProtocolTest
         public void CreationTest()
         {
             //Arrange
-            var attr = CustomConfigAttribute.CreateConfigAttribute("localhost", "1445", "Icmp");
+            var attr = CustomConfigAttribute.CreateConfigAttribute("localhost", "1445", "icmp");
             var mock = new Mock<IPinger>();
             var iProtocol = new Mock<IProtocol>();
             mock.Setup(x => x.Protocol).Returns(iProtocol.Object);

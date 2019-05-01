@@ -2,21 +2,14 @@
 
 namespace Pinger.UI
 {
-    public interface IConsoleOutputUi
-    {
-        void PrintMessage(string message);
-        void PrintMessage(string message, string tab, bool endRow);
-    }
-
-
     public class ConsoleOutputOutputMessage : IConsoleOutputUi
     {
-        public void PrintMessage(string message)
+        public void PrintMessage(String message)
         {
             Console.WriteLine(message);
         }
 
-        public void PrintMessage(string message, string tab, bool endRow)
+        public void PrintMessage(String message, String tab, Boolean endRow)
         {
             if(endRow)
                 Console.WriteLine(tab+message+tab);

@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System;
+using NLog;
 using NLog.Config;
 using NLog.Targets;
 
@@ -6,7 +7,7 @@ namespace Pinger.Logger
 {
     public sealed class NlogConfiguration: IConfigurationNlog
     {
-        public LoggingConfiguration GetLogConfiguration(string logName)
+        public LoggingConfiguration GetLogConfiguration(String logName)
         {
             LoggingConfiguration config = new LoggingConfiguration();
             FileTarget fileTarget = new FileTarget(logName);

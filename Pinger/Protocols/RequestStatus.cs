@@ -1,11 +1,13 @@
 ﻿
+using System;
+
 namespace Pinger.Protocols
 {
     public class RequestStatus
     {
-        public bool IsSucces { get; private set; }
+        public Boolean IsSucces { get;}
 
-        public RequestStatus(bool isSuccess)
+        public RequestStatus(Boolean isSuccess)
         {
             IsSucces = isSuccess;
         }

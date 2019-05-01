@@ -31,17 +31,25 @@ namespace Pinger.ConfigurationModule
                 switch (properties[x].Name)
                 {
                     case nameof(Host):
+                    {
                         conf.Host = values[x];
                         break;
+                    }
                     case nameof(Interval):
+                    {
                         conf.Interval = values[x];
                         break;
+                    }
                     case nameof(Protocol):
+                    {
                         conf.Protocol = values[x];
                         break;
+                    }
                     case nameof(HttpCode):
+                    {
                         conf.HttpCode = values[x];
                         break;
+                    }
                 }
             }
             return conf;
@@ -52,10 +60,10 @@ namespace Pinger.ConfigurationModule
             CustomConfigAttribute confAttr = new CustomConfigAttribute();
             var properties = confAttr.GetType().GetProperties();
             Int32 index = 0;
-            foreach (string val in values)
+            foreach (String val in values)
             {
                 var prop = confAttr.GetType().GetProperty(properties[index].Name);
-                prop.SetValue(confAttr, val);
+                if (prop != null) prop.SetValue(confAttr, val);
                 index++;
             }
             return confAttr;
@@ -65,7 +73,7 @@ namespace Pinger.ConfigurationModule
         {
             var memInfo = typeof(Configuration).GetMember(Configuration.RefreshRate.ToString()).First();
             var cusAttrobutes = memInfo.CustomAttributes.Select(x => x.NamedArguments).First();
-            for (int x = 0; x < cusAttrobutes.Count(); x++)
+            for (Int32 x = 0; x < cusAttrobutes.Count(); x++)
             {
                 if (cusAttrobutes[x].MemberName == nameProperty)
                     return cusAttrobutes[x].TypedValue.Value.ToString();

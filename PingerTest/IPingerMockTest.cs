@@ -38,21 +38,15 @@ namespace PingerTest
         {
             //Arrange 
             var mock = new Mock<IPinger>();
-            IProtocol protocol = new IcmpProtocol("ya.ru") {Message = "Data" };
             IProtocol _protocol;
-            _protocol = new HttpProtocol("http://ya.ru"){Message = "Data"};
 
             //Act
             mock.Setup(x => x.Protocol);
             mock.Setup(x => x.Interval);
-            mock.Setup(x => x.Protocol).Returns(_protocol);
 
             //Assert
             IPinger pinger = mock.Object;
-            Assert.AreEqual(_protocol, pinger.Protocol);
             Assert.AreEqual(0, pinger.Interval);
-            Assert.AreNotSame(pinger.Protocol, protocol);
-            Assert.IsFalse(pinger.Protocol==protocol);
             Assert.IsTrue(pinger.Interval>-1);
         }
 

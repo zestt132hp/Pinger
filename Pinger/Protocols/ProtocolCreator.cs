@@ -35,17 +35,21 @@ namespace Pinger.Protocols
                     pProtocol = new PingerModule.Pinger(new IcmpProtocol(data.Host), PingerRegistrationModules.GetKernel().Get<ILogger>());
                     pProtocol.SetInterval(data.Interval);
                     return pProtocol;
-
                 }
                 case "tcp/ip":
                 case "tcp":
                 case "ip":
-                    pProtocol = new PingerModule.Pinger(new TcpProtocol(data.Host), PingerRegistrationModules.GetKernel().Get<ILogger>());
+                {
+                    pProtocol = new PingerModule.Pinger(new TcpProtocol(data.Host),
+                        PingerRegistrationModules.GetKernel().Get<ILogger>());
                     pProtocol.SetInterval(data.Interval);
                     return pProtocol;
+                }
                 default:
+                {
                     throw new NotImplementedException(
                         "Реализовано всего три протокола, пожалуйста убедитесь в правильности ввода");
+                }
             }
         }
     }

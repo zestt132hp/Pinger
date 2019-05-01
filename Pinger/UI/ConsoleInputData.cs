@@ -10,9 +10,9 @@ namespace Pinger.UI
             return Console.ReadLine()?.Split(' ');
         }
 
-        public Boolean VerifyString(ref string command, params string[] simbols)
+        public Boolean VerifyString(ref String command, params String[] simbols)
         {
-            string tmp = command;
+            String tmp = command;
             if (String.IsNullOrEmpty(tmp))
                 return false;
             simbols.Map(x =>
@@ -31,17 +31,12 @@ namespace Pinger.UI
 
         private Boolean VerifyString(String str)
         {
-            string[] tmp = str.Split(' ');
-            int itmp;
+            String[] tmp = str.Split(' ');
+            Int32 itmp;
             if(tmp.Length<2 && Int32.TryParse(tmp[0], out itmp))
                 return true;
             else
                 return tmp.Length > 2;
         }
-    }
-    interface IInputsUi
-    {
-        String[] ValuesFromUi();
-        Boolean VerifyString(ref String inputStr, params String[] simbols);
     }
 }

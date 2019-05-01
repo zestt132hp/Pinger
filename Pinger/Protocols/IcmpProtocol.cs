@@ -9,20 +9,17 @@ namespace Pinger.Protocols
 {
     public class IcmpProtocol:IProtocol
     {
-        public string Host { get; set; }
-        private  static readonly String _message = "DataTest";
-        public string ProtocolName => "Icmp";
-        public string Message { get; set; } = _message;
-        public IcmpProtocol(string host)
+        public String Host { get;}
+        private String _message = "DataTest";
+        public String ProtocolName => "Icmp";
+        public String Message => _message;
+        public IcmpProtocol(String host)
         {
-            if (string.IsNullOrEmpty(host))
-                Host = host;
-            else
-                Host = "localhost";
+            Host = String.IsNullOrEmpty(host) ? host : "localhost";
         }
         public RequestStatus SendRequest(ILogger logger)
         {
-            const int timeout = 120;
+            const Int32 timeout = 120;
             var reply = default(PingReply);
 
             try
@@ -41,19 +38,19 @@ namespace Pinger.Protocols
                 {
                     var bytes = reply.Buffer;
                     var responseData = Encoding.UTF8.GetString(dataBytes, 0, bytes.Length);
-                    Message = $"Получены данные {responseData}";
+                    _message = $"Получены данные {responseData}";
                     return new RequestStatus(reply.Status == IPStatus.Success);
                 }
                 else
                 {
-                    Message = $"Полученные даннные отсутвуют {nameof(reply)}";
+                    _message = $"Полученные даннные отсутвуют {nameof(reply)}";
                     return new RequestStatus(false);
                 }
             }
             catch (Exception ex)
             {
                 logger.Write(ex);
-                Message = $"Ошибка при получении данных";
+                _message = $"Ошибка при получении данных";
                 return new RequestStatus(false);
             }
         }

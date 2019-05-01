@@ -72,6 +72,8 @@
     <Compile Include="PingerModule\PingerProcessor.cs" />
     <Compile Include="UI\ConsoleInputData.cs" />
     <Compile Include="UI\ConsoleOutputMessage.cs" />
+    <Compile Include="UI\IConsoleOutputUi.cs" />
+    <Compile Include="UI\IInputsUi.cs" />
     <Compile Include="UI\IUi.cs" />
     <Compile Include="Logger\IConfigurationNlog.cs" />
     <Compile Include="Logger\ILogger.cs" />

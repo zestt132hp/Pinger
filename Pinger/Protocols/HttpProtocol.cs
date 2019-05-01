@@ -8,29 +8,27 @@ namespace Pinger.Protocols
     public class HttpProtocol :IProtocol
     {
         private readonly Regex _regex = new Regex("^(http|https)://");
-        private string _host;
+        private String _host;
+        private String _message = "dataString";
         private readonly HttpStatusCode _code = HttpStatusCode.OK;
 
-        public Int16 StatusCode
-        {
-            get { return (Int16) _code; }
-        }
+        public Int16 StatusCode => (Int16) _code;
 
-        public string ProtocolName => "Http/Https";
-        public string Message { get; set; }
+        public String ProtocolName => "Http/Https";
+        public String Message => _message;
 
-        public HttpProtocol(string hostname, HttpStatusCode statusCode)
+        public HttpProtocol(String hostname, HttpStatusCode statusCode)
         {
             _code = statusCode;
             TryHost(hostname);
         }
 
-        public HttpProtocol(string hostName)
+        public HttpProtocol(String hostName)
         {
             TryHost(hostName);
         }
 
-        private void TryHost(string hostName)
+        private void TryHost(String hostName)
         {
             if (string.IsNullOrEmpty(hostName))
                 throw new ArgumentNullException(nameof(hostName));
@@ -41,29 +39,27 @@ namespace Pinger.Protocols
             }
             _host = hostName;
         }
-        public string Host {
-            get { return _host; }
-            set { TryHost(value);}
-        }
+        public string Host => _host;
+
         public RequestStatus SendRequest(ILogger logger) 
         {
             try
             {
                 using (HttpWebResponse resp = (HttpWebResponse) WebRequest.Create(new Uri(Host)).GetResponse())
                 {
-                    Message = $"Получен ответ: {resp.StatusDescription}";
+                    _message = $"Получен ответ: {resp.StatusDescription}";
                     return new RequestStatus(resp.StatusCode == _code);
                 }
             }
             catch (WebException e)
             {
-                Message = "Неудачный запрос |" + e.Message;
+                _message = "Неудачный запрос |" + e.Message;
                 return new RequestStatus(false);
             }
             catch (Exception e)
             {
                 logger.Write(new Exception(Host + "||" + e.Message));
-                Message = $"Ошибка при соединении";
+                _message = $"Ошибка при соединении";
                 return new RequestStatus(false);
             }
         }

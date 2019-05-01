@@ -1,12 +1,13 @@
-﻿using Pinger.Logger;
+﻿using System;
+using Pinger.Logger;
 
 namespace Pinger.Protocols
 {
     public interface IProtocol
     {
-        string Host { get; }
-        string ProtocolName { get; }
-        string Message { get; }
+        String Host { get; }
+        String ProtocolName { get; }
+        String Message { get; }
         RequestStatus SendRequest(ILogger logger);
     }
 }
