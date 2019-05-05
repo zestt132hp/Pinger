@@ -8,6 +8,6 @@ namespace Pinger.Protocols
         String Host { get; }
         String ProtocolName { get; }
         String Message { get; }
-        RequestStatus SendRequest(ILogger logger);
+        RequestStatus SendRequest<T>(ILogger<Exception> logger);
     }
 }

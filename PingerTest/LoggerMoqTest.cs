@@ -12,17 +12,15 @@ namespace PingerTest
         public void WriteMethodTest()
         {
             //arrange
-            var mock = new Mock<ILogger>();
+            var excLog = new Mock<ILogger<Exception>>();
 
             //act
-            mock.Setup(x => x.Write(It.IsAny<String>())).Verifiable();
-            mock.Setup(x => x.Write(It.IsAny<Exception>())).Verifiable();
+            excLog.Setup(x => x.Write(It.IsAny<Exception>())).Verifiable();
 
             //assert
-            ILogger logger = mock.Object;
-            logger.Write("Hello World");
+            ILogger<Exception> logger = excLog.Object;
             logger.Write(new Exception("Hello from Exception"));
-            Mock.VerifyAll(mock);
+            Mock.VerifyAll(excLog);
         }
     }
 }

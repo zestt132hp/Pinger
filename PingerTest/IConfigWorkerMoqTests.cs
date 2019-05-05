@@ -13,8 +13,8 @@ namespace PingerTest
     [TestClass]
     public class ConfigWorkerMoqTests
     {
-        private Dictionary<int, IPinger> _listHost;
-        private readonly Dictionary<int, IPinger> _list = null;
+        private Dictionary<Int32, IPinger> _listHost;
+        private readonly Dictionary<Int32, IPinger> _list = null;
 
         [TestMethod]
         public void MoqConfigWorkerTest()
@@ -22,12 +22,13 @@ namespace PingerTest
             //arrange
             var workconf = new Mock<IConfigWorker>();
             var protocol = new Mock<IProtocol>();
-            var logger = new Mock<ILogger>();
-            _listHost = new Dictionary<int, IPinger>(10)
+            var excLog = new Mock<ILogger<Exception>>();
+            var logger = new Mock<ILogger<String>>();
+            _listHost = new Dictionary<Int32, IPinger>(10)
             {
-                {1, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)},
-                {2, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)},
-                {3, new Pinger.PingerModule.Pinger(protocol.Object, logger.Object)}
+                {1, new Pinger.PingerModule.Pinger(protocol.Object, excLog.Object, logger.Object)},
+                {2, new Pinger.PingerModule.Pinger(protocol.Object, excLog.Object, logger.Object)},
+                {3, new Pinger.PingerModule.Pinger(protocol.Object, excLog.Object, logger.Object)}
             };
 
             //act
@@ -36,8 +37,8 @@ namespace PingerTest
 
             workconf.Setup(x=>x.SaveInConfig()).Returns(false);
             workconf.Setup(x => x.SaveInConfig("")).Returns(false);
-            string[] array = {"www.google.com", "5", "http", "200"};
-            workconf.Setup(x => x.SaveInConfig(It.Is<string[]>(z=>array.Length>4 && array.Length<3))).Returns(false);
+            String[] array = {"www.google.com", "5", "http", "200"};
+            workconf.Setup(x => x.SaveInConfig(It.Is<String[]>(z=>array.Length>4 && array.Length<3))).Returns(false);
             workconf.Setup(x => x.SaveInConfig(array)).Returns(true);
 
             workconf.Setup(

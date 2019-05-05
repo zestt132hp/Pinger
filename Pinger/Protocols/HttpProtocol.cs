@@ -30,7 +30,7 @@ namespace Pinger.Protocols
 
         private void TryHost(String hostName)
         {
-            if (string.IsNullOrEmpty(hostName))
+            if (String.IsNullOrEmpty(hostName))
                 throw new ArgumentNullException(nameof(hostName));
             if (!_regex.IsMatch(hostName))
             {
@@ -39,9 +39,9 @@ namespace Pinger.Protocols
             }
             _host = hostName;
         }
-        public string Host => _host;
+        public String Host => _host;
 
-        public RequestStatus SendRequest(ILogger logger) 
+        public RequestStatus SendRequest<T>(ILogger<Exception> logger) 
         {
             try
             {
@@ -58,8 +58,8 @@ namespace Pinger.Protocols
             }
             catch (Exception e)
             {
-                logger.Write(new Exception(Host + "||" + e.Message));
                 _message = $"Ошибка при соединении";
+                logger.Write(e);
                 return new RequestStatus(false);
             }
         }

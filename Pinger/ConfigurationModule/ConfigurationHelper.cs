@@ -22,7 +22,7 @@ namespace Pinger.ConfigurationModule
         public String HttpCode { get; set; }
         public String Port { get; set; }
 
-        public static CustomConfigAttribute CreateConfigAttribute(params String[] values)
+        /*public static CustomConfigAttribute CreateConfigAttribute(params String[] values)
         {
             CustomConfigAttribute conf = new CustomConfigAttribute();
             var properties = typeof(CustomConfigAttribute).GetProperties();
@@ -53,7 +53,7 @@ namespace Pinger.ConfigurationModule
                 }
             }
             return conf;
-        }
+        }*/
 
         public static CustomConfigAttribute CreateConfigAttribute(Array values)
         {

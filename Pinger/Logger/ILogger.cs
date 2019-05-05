@@ -1,8 +1,8 @@
 ﻿
 namespace Pinger.Logger
 {
-    public interface ILogger
+    public interface ILogger<T>
     {
-        void Write<T>(T message);
+        void Write(T value);
     }
 }

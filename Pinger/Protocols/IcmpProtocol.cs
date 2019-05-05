@@ -10,16 +10,17 @@ namespace Pinger.Protocols
     public class IcmpProtocol:IProtocol
     {
         public String Host { get;}
-        private String _message = "DataTest";
+        private String _message;
         public String ProtocolName => "Icmp";
         public String Message => _message;
         public IcmpProtocol(String host)
         {
             Host = String.IsNullOrEmpty(host) ? host : "localhost";
         }
-        public RequestStatus SendRequest(ILogger logger)
+        public RequestStatus SendRequest<T>(ILogger<Exception> logger)
         {
             const Int32 timeout = 120;
+            _message = "test";
             var reply = default(PingReply);
 
             try
@@ -38,7 +39,7 @@ namespace Pinger.Protocols
                 {
                     var bytes = reply.Buffer;
                     var responseData = Encoding.UTF8.GetString(dataBytes, 0, bytes.Length);
-                    _message = $"Получены данные {responseData}";
+                    _message = "Получены данные " + responseData;
                     return new RequestStatus(reply.Status == IPStatus.Success);
                 }
                 else

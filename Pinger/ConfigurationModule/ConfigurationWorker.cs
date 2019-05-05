@@ -12,20 +12,22 @@ namespace Pinger.ConfigurationModule
     {
         #region Private Members & Methods & Property
 
-        private static XElement _rootNode;
+        private XElement _rootNode;
         private event EventHandler Refresh;
-        private static String ConfigFileName { get; set; }
-        private static readonly Dictionary<Int32, PingerModule.IPinger> ListProtocols = new Dictionary<Int32, PingerModule.IPinger>();
-        private static readonly String DataConfiguration = "DataConfiguration";
+        private String ConfigFileName { get; set; }
+        private readonly Dictionary<Int32, PingerModule.IPinger> _listProtocols = new Dictionary<Int32, PingerModule.IPinger>();
+        private readonly String DataConfiguration = "DataConfiguration";
+        private readonly IProtocolFactory _factory;
+        private ProtocolCreator _creator;
 
         private void ConfigurationReader_Refresh(object sender, EventArgs e)
         {
             GetProtocolsFromConfig(Configuration.RefreshRate);
         }
-        private static Dictionary<Int32, PingerModule.IPinger> GetProtocolsFromConfig()
+        private Dictionary<Int32, PingerModule.IPinger> GetProtocolsFromConfig()
         {
-            if(ListProtocols.Any())
-                ListProtocols.Clear();
+            if(_listProtocols.Any())
+                _listProtocols.Clear();
             if (_rootNode == null)
             {
                 return null;
@@ -42,12 +44,11 @@ namespace Pinger.ConfigurationModule
                                 Port = x.Element(nameof(CustomConfigAttribute.Port))?.Value,
                                 HttpCode = x.Element(nameof(CustomConfigAttribute.HttpCode))?.Value
                             }).ToList();
-
             for (Int32 x = 0; x < items.Count(); x++)
             {
-                ListProtocols.Add(x, ProtocolCreator.CreateProtocol(items[x]));
+                _listProtocols.Add(x, _creator.CreateProtocol(items[x]));
             }
-            return ListProtocols;
+            return _listProtocols;
 
         }
         private Dictionary<Int32, PingerModule.IPinger> GetProtocolsFromConfig(Enum enumValue)
@@ -63,14 +64,14 @@ namespace Pinger.ConfigurationModule
             if (_rootNode == null)
                 return;
             XElement dataConfiguration = new XElement(DataConfiguration);
-            dataConfiguration.Add(new XElement(nameof(attribute.Host), attribute.Host, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Host) ?? ""))),
-                new XElement(nameof(attribute.Interval), attribute.Interval, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Interval) ?? ""))),
-                new XElement(nameof(attribute.Protocol), attribute.Protocol, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Protocol) ?? ""))));
+            dataConfiguration.Add(new XElement(nameof(attribute.Host), attribute.Host, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Host)))),
+                new XElement(nameof(attribute.Interval), attribute.Interval, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Interval)))),
+                new XElement(nameof(attribute.Protocol), attribute.Protocol, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Protocol)))));
             if (attribute.HttpCode != null)
-                dataConfiguration.Add(new XElement(nameof(attribute.HttpCode), attribute.HttpCode, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.HttpCode) ?? ""))));
+                dataConfiguration.Add(new XElement(nameof(attribute.HttpCode), attribute.HttpCode, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.HttpCode)))));
             else
             if (attribute.Port != null)
-                dataConfiguration.Add(new XElement(nameof(attribute.Port), attribute.Port, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Port) ?? ""))));
+                dataConfiguration.Add(new XElement(nameof(attribute.Port), attribute.Port, new XAttribute("Name", CustomConfigAttribute.GetValueAttribute(nameof(attribute.Port)))));
             _rootNode.Add(dataConfiguration);
             _rootNode.Save(ConfigFileName);
             Refresh?.Invoke(this, new EventArgs());
@@ -78,16 +79,15 @@ namespace Pinger.ConfigurationModule
 
         #endregion
 
-
-
-        #region Public Methods
-
-        public ConfigurationWorker(String fileName)
+        public ConfigurationWorker(String fileName, IProtocolFactory factory, ProtocolCreator creator)
         {
-            if (string.IsNullOrEmpty(fileName))
-                throw new ArgumentNullException("Имя файла конфигурации не может быть пустым");
+            if (String.IsNullOrEmpty(fileName))
+                throw new ArgumentNullException(nameof(fileName));
+            _factory = factory ?? throw new NullReferenceException(nameof(ConfigurationWorker));
+            _creator = creator ?? throw new NullReferenceException(
+                           nameof(ConfigurationWorker) + nameof(ProtocolCreator));
             ConfigFileName = fileName;
-            string uri = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName;
+            String uri = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName;
             if (File.Exists(uri))
             {
                 _rootNode = XElement.Load(uri);
@@ -97,9 +97,9 @@ namespace Pinger.ConfigurationModule
                 CreateConfig();
         }
 
+        #region Public Methods
 
-
-        public Boolean SaveInConfig(params string[] values)
+        public Boolean SaveInConfig(params String[] values)
         {
             if (!values.Any())
                 return false;
@@ -113,27 +113,27 @@ namespace Pinger.ConfigurationModule
 
         public Dictionary<Int32, PingerModule.IPinger> GetFromConfig()
         {
-            if (!ListProtocols.Any())
+            if (!_listProtocols.Any())
             {
                 Refresh?.Invoke(this, new EventArgs());
-                if (!ListProtocols.Any())
-                    return ListProtocols;
+                if (!_listProtocols.Any())
+                    return _listProtocols;
                 GetFromConfig();
             }
-            return ListProtocols;
+            return _listProtocols;
         }
 
         public Boolean RemoveFromConfig(Int32 index)
         {
-            if (!ListProtocols.Any())
+            if (!_listProtocols.Any())
             {
                 Refresh?.Invoke(this, new EventArgs());
-                if (!ListProtocols.Any())
+                if (!_listProtocols.Any())
                     return false;
                 else
                     RemoveFromConfig(index);
             }
-            if (ListProtocols.ContainsKey(index))
+            if (_listProtocols.ContainsKey(index))
             {
                 _rootNode.Elements(DataConfiguration)
                     .Select(x => x).ToArray()[index].Remove();

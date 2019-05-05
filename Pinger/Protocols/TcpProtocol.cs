@@ -48,7 +48,7 @@ namespace Pinger.Protocols
             }
         }
 
-        public RequestStatus SendRequest(ILogger logger)
+        public RequestStatus SendRequest<T>(ILogger<Exception> logger)
         {
             try
             {

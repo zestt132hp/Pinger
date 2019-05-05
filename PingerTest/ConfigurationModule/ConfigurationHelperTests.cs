@@ -13,7 +13,7 @@ namespace PingerTest.ConfigurationModule
             //Arrange
             var attribute1 = new CustomConfigAttribute();
             CustomConfigAttribute attribute2;
-            string host = "http://www.yandex.ru",
+            String host = "http://www.yandex.ru",
                 Interval = "5",
                 Protocol = "http/https",
                 HttpCode = "123",
@@ -25,15 +25,15 @@ namespace PingerTest.ConfigurationModule
             attribute1.Protocol = Protocol;
             attribute1.Interval = Interval;
             attribute1.Port = Port;
-            attribute2 = CustomConfigAttribute.CreateConfigAttribute(host, Interval, Protocol, HttpCode, Port);
+            attribute2 = CustomConfigAttribute.CreateConfigAttribute(new [] {host, Interval, Protocol, HttpCode, Port});
 
             //Assert
             Assert.AreSame(attribute1.Host, attribute2.Host);
             Assert.AreSame(attribute1.HttpCode, attribute1.HttpCode);
             Assert.AreSame(attribute1.Protocol, attribute2.Protocol);
             Assert.AreSame(attribute1.Interval, attribute1.Interval);
-            Assert.AreNotSame(attribute1.Port, attribute2.Port);
-            Assert.AreNotEqual(attribute1, attribute2);
+            Assert.AreSame(attribute1.Port, attribute2.Port);
+            Assert.AreEqual(attribute1, attribute2);
 
         }
 
@@ -43,7 +43,7 @@ namespace PingerTest.ConfigurationModule
             //Arrange
             var attribute1 = new CustomConfigAttribute();
             CustomConfigAttribute attribute2;
-            string host = "http://www.yandex.ru",
+            String host = "http://www.yandex.ru",
                 Interval = "5",
                 Protocol = "http/https",
                 HttpCode = "123",
@@ -71,17 +71,17 @@ namespace PingerTest.ConfigurationModule
         {
             //Arrange
             var property = new CustomConfigAttribute().GetType().GetProperties();
-            string[] array = new string[property.Length - 1];
+            String[] array = new String[property.Length - 1];
 
             //Act
-            for (int x = 0; x < property.Length - 1; x++)
+            for (Int32 x = 0; x < property.Length - 1; x++)
             {
                 array[x] = CustomConfigAttribute.GetValueAttribute(property[x].Name);
             }
 
             //Assert
             Assert.IsNotNull(array);
-            foreach (string t in array)
+            foreach (String t in array)
             {
                 Assert.IsNotNull(t);
             }

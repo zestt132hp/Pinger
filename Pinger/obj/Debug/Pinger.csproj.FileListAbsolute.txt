@@ -297,3 +297,5 @@ E:\Pinger\Pinger\Pinger\obj\Debug\Pinger.csproj.CoreCompileInputs.cache
 E:\Pinger\Pinger\Pinger\obj\Debug\Pinger.csproj.CopyComplete
 E:\Pinger\Pinger\Pinger\obj\Debug\Pinger.exe
 E:\Pinger\Pinger\Pinger\obj\Debug\Pinger.pdb
+E:\Pinger\Pinger\Pinger\bin\Debug\Ninject.Extensions.Factory.dll
+E:\Pinger\Pinger\Pinger\bin\Debug\Ninject.Extensions.Factory.xml

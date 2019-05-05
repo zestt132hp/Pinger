@@ -337,3 +337,5 @@ E:\Pinger\Pinger\PingerTest\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 E:\Pinger\Pinger\PingerTest\bin\Debug\System.Threading.Tasks.Extensions.xml
 E:\Pinger\Pinger\PingerTest\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
 E:\Pinger\Pinger\PingerTest\obj\Debug\PingerTest.csproj.CopyComplete
+E:\Pinger\Pinger\PingerTest\bin\Debug\Ninject.Extensions.Factory.dll
+E:\Pinger\Pinger\PingerTest\bin\Debug\Ninject.Extensions.Factory.xml

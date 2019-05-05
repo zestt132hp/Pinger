@@ -1,11 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Ninject;
-using Pinger.Logger;
 using Pinger.PingerModule;
-using Pinger.Protocols;
-using Pinger.UI;
 
 namespace PingerTest
 {
@@ -18,8 +14,6 @@ namespace PingerTest
         {
             //Arrange
             var mock = new Mock<IPinger>();
-            var ui = new ConsoleWorkProcessUi();
-            ui.InjectKernel.Get<ILogger>();
 
             //Act
             mock.Setup(x => x.StartWork()).Verifiable();
@@ -38,7 +32,6 @@ namespace PingerTest
         {
             //Arrange 
             var mock = new Mock<IPinger>();
-            IProtocol _protocol;
 
             //Act
             mock.Setup(x => x.Protocol);
@@ -56,18 +49,17 @@ namespace PingerTest
         {
             //Arrange
             var mock = new Mock<IPingerProcessor>();
-            var logger = new Mock<ILogger>();
-            mock.Setup(x => x.Ping(logger.Object)).Verifiable();
-            mock.Setup(x => x.Ping(It.Is<Int32>(z => z < 0), logger.Object)).Throws(new ArgumentException());
+            mock.Setup(x => x.Ping()).Verifiable();
+            mock.Setup(x => x.Ping(It.Is<Int32>(z => z < 0))).Throws(new ArgumentException());
             mock.Setup(x => x.StopPing()).Verifiable();
 
             //Act
             IPingerProcessor processor = mock.Object;
 
             //Assert
-            processor.Ping(logger.Object);
-            processor.Ping(-1, logger.Object);
-            processor.Ping(1, logger.Object);
+            processor.Ping();
+            processor.Ping(-1);
+            processor.Ping(1);
             processor.StopPing();
             Mock.VerifyAll(mock);
         }
