@@ -11,7 +11,7 @@ namespace PingerTest.ProtocolTest
     public class IcmpProtocolTest
     {
         [TestMethod]
-        public void IcmpTest()
+        public void FactoryTest()
         {
             //Arrange
             var protocolfactory = new Mock<IProtocolFactory>();

@@ -33,6 +33,7 @@ namespace Pinger.PingerModule
 
         public void StopWork()
         {
+            _timer.Elapsed -= OnTimedEvent;
             StopTimer();
         }
 
@@ -63,7 +64,7 @@ namespace Pinger.PingerModule
             _logger.Write(message);
         }
 
-        public void StopTimer()
+        private void StopTimer()
         {
             if (_timer == null)
                 throw new NullReferenceException(nameof(_timer));

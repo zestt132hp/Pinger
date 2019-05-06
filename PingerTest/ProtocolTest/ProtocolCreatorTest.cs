@@ -28,21 +28,11 @@ namespace PingerTest.ProtocolTest
             IProtocol exprotocol = new IcmpProtocol("localhost");
             
             //Assert
-            //Assert.AreEqual(exprotocol.Host, pinger.Protocol.Host);
             Assert.AreEqual(_ipinger.Protocol.Host, exprotocol.Host);
             Assert.AreEqual(exprotocol.Host, protocol.Host);
-            //Assert.AreEqual(protocol.Host, pinger.Protocol.Host);
-
-           // Assert.AreEqual(exprotocol.ProtocolName, pinger.Protocol.ProtocolName);
             Assert.AreEqual(_ipinger.Protocol.ProtocolName, exprotocol.ProtocolName);
             Assert.AreEqual(exprotocol.ProtocolName, protocol.ProtocolName);
-            //Assert.AreEqual(protocol.ProtocolName, pinger.Protocol.ProtocolName);
-
-            //Assert.AreEqual(pinger.Interval, _ipinger.Interval);
-
-            //Assert.AreNotEqual(exprotocol, pinger.Protocol);
             Assert.AreNotEqual(exprotocol, protocol);
-            //Assert.AreNotEqual(pinger.Protocol, protocol);
         }
     }
 }
